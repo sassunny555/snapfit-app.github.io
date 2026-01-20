@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SnapFit - Your AI-powered calorie tracker. Scan meals, track water intake, monitor progress, and discover healthy recipes. Download now on Google Play.">
+    <meta name="keywords" content="calorie tracker, meal scanner, AI food recognition, water tracker, weight loss, fitness app">
+    <title>SnapFit - AI Calorie Tracker | Scan. Track. Transform.</title>
+    <link rel="icon" type="image/png" href="Resources/Logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="hero-bg"></div>
+        <nav class="navbar">
+            <div class="logo">
+                <img src="Resources/Logo.png" alt="SnapFit Logo">
+                <span>SnapFit</span>
+            </div>
+            <div class="nav-links">
+                <a href="#screenshots" class="nav-link">See It In Action</a>
+                <a href="#features" class="nav-link">Why SnapFit?</a>
+                <a href="https://sites.google.com/view/snapfit-ai-privacy-policy" class="nav-link" target="_blank">Privacy</a>
+                <a href="terms.html" class="nav-link">Terms</a>
+                <a href="#" class="nav-link" id="contactBtn">Contact</a>
+            </div>
+            <a href="https://play.google.com/store/apps/details?id=com.snapfit.calorietracker" class="nav-cta" target="_blank">
+                Download
+            </a>
+        </nav>
+        
+        <div class="hero-content">
+            <h1>Your AI-Powered<br><span class="accent-text">Calorie Tracker</span></h1>
+            <p class="hero-subtitle">Scan meals with AI. Track water & calories. Achieve your fitness goals effortlessly.</p>
+            
+            <div class="store-buttons">
+                <a href="https://play.google.com/store/apps/details?id=com.snapfit.calorietracker" class="store-btn" target="_blank">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
+                </a>
+                <a href="#" class="store-btn" id="appStoreBtn">
+                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on App Store">
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Coming Soon Modal -->
+    <div class="modal-overlay" id="comingSoonModal">
+        <div class="modal-content">
+            <div class="modal-icon">🍎</div>
+            <h3>Coming Soon!</h3>
+            <p>SnapFit for iOS is currently in development. We'll notify you when it's available!</p>
+            <button class="modal-close" id="modalClose">Got it</button>
+        </div>
+    </div>
+
+    <!-- Screenshots Section -->
+    <section class="screenshots" id="screenshots">
+        <div class="container">
+            <h2 class="section-title">See It In Action</h2>
+            <p class="section-subtitle">A glimpse of the SnapFit experience</p>
+            
+            <div class="screenshots-carousel">
+                <div class="carousel-track">
+                    <div class="screenshot-item">
+                        <img src="Resources/screenshots/2.png" alt="AI Meal Scanning">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="Resources/screenshots/3.png" alt="Water Tracking">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="Resources/screenshots/4.png" alt="Progress Tracking">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="Resources/screenshots/5.png" alt="Recipe Creation">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="Resources/screenshots/6.png" alt="Feature 6">
+                    </div>
+                    <div class="screenshot-item">
+                        <img src="Resources/screenshots/7.png" alt="Feature 7">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <h2 class="section-title">Why SnapFit?</h2>
+            <p class="section-subtitle">Everything you need to achieve your health goals</p>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
+                            <circle cx="12" cy="13" r="4"></circle>
+                        </svg>
+                    </div>
+                    <h3>AI Meal Scanning</h3>
+                    <p>Snap a photo and let AI identify your food instantly.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
+                        </svg>
+                    </div>
+                    <h3>Water Tracking</h3>
+                    <p>Stay hydrated with easy logging and daily goals.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M3 3v18h18"></path>
+                            <path d="M18 17V9"></path>
+                            <path d="M13 17V5"></path>
+                            <path d="M8 17v-3"></path>
+                        </svg>
+                    </div>
+                    <h3>Progress Tracking</h3>
+                    <p>Visualize trends with beautiful analytics.</p>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"></path>
+                            <line x1="6" y1="17" x2="18" y2="17"></line>
+                        </svg>
+                    </div>
+                    <h3>Smart Recipes</h3>
+                    <p>Discover healthy meals with full nutrition info.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Reviews Section -->
+    <section class="reviews">
+        <div class="container">
+            <h2 class="section-title">Loved by Users</h2>
+            <p class="section-subtitle">See what our community is saying</p>
+        </div>
+        
+        <div class="reviews-carousel">
+            <div class="reviews-track">
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Finally an app that makes calorie tracking effortless! The AI scanning is incredibly accurate."</p>
+                    <div class="review-author">
+                        <div class="author-avatar">S</div>
+                        <div class="author-info">
+                            <span class="author-name">Sarah M.</span>
+                            <span class="author-meta">Lost 12 lbs in 2 months</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"The water tracking reminders helped me build a healthy hydration habit. Love the clean design!"</p>
+                    <div class="review-author">
+                        <div class="author-avatar">J</div>
+                        <div class="author-info">
+                            <span class="author-name">James K.</span>
+                            <span class="author-meta">Using for 6 months</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Best fitness app I've tried. The recipe suggestions are spot on and the UI is beautiful."</p>
+                    <div class="review-author">
+                        <div class="author-avatar">E</div>
+                        <div class="author-info">
+                            <span class="author-name">Emily R.</span>
+                            <span class="author-meta">Reached goal weight</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"I love how it tracks macros automatically. No more manual calculations. Game changer!"</p>
+                    <div class="review-author">
+                        <div class="author-avatar">M</div>
+                        <div class="author-info">
+                            <span class="author-name">Michael T.</span>
+                            <span class="author-meta">Gym enthusiast</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"Dark mode looks amazing! The app is so intuitive. My whole family uses it now."</p>
+                    <div class="review-author">
+                        <div class="author-avatar">A</div>
+                        <div class="author-info">
+                            <span class="author-name">Anna L.</span>
+                            <span class="author-meta">Family of 4 users</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="review-card">
+                    <div class="review-stars">★★★★★</div>
+                    <p class="review-text">"The progress charts keep me motivated every day. Down 20 lbs and feeling great!"</p>
+                    <div class="review-author">
+                        <div class="author-avatar">D</div>
+                        <div class="author-info">
+                            <span class="author-name">David W.</span>
+                            <span class="author-meta">Lost 20 lbs</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Product Hunt Section -->
+    <section class="product-hunt">
+        <div class="container">
+            <h2 class="section-title">Featured on Product Hunt</h2>
+            <div class="ph-embed">
+                <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; border: 1px solid rgb(224, 224, 224); border-radius: 12px; padding: 20px; max-width: 500px; background: rgb(255, 255, 255); box-shadow: rgba(0, 0, 0, 0.05) 0px 2px 8px;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                        <img alt="SnapFit – AI Calorie Counter" src="https://ph-files.imgix.net/89a20c70-27a3-4e2f-9898-2e10bfa7b6b6.jpeg?auto=format&fit=crop&w=80&h=80" style="width: 64px; height: 64px; border-radius: 8px; object-fit: cover; flex-shrink: 0;">
+                        <div style="flex: 1 1 0%; min-width: 0px;">
+                            <h3 style="margin: 0px; font-size: 18px; font-weight: 600; color: rgb(26, 26, 26); line-height: 1.3; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">SnapFit – AI Calorie Counter</h3>
+                            <p style="margin: 4px 0px 0px; font-size: 14px; color: rgb(102, 102, 102); line-height: 1.4; overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;">Track calories, water, workouts & healthy recipes easily</p>
+                        </div>
+                    </div>
+                    <a href="https://www.producthunt.com/products/snapfit-ai-calorie-counter?embed=true&utm_source=embed&utm_medium=post_embed" target="_blank" rel="noopener" style="display: inline-flex; align-items: center; gap: 4px; margin-top: 12px; padding: 8px 16px; background: rgb(255, 97, 84); color: rgb(255, 255, 255); text-decoration: none; border-radius: 8px; font-size: 14px; font-weight: 600;">Check it out on Product Hunt →</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta">
+        <div class="container">
+            <div class="cta-content">
+                <h2>Start Your Journey Today</h2>
+                <p>Join thousands already transforming their health with SnapFit</p>
+            <div class="store-buttons">
+                <a href="https://play.google.com/store/apps/details?id=com.snapfit.calorietracker" class="store-btn" target="_blank">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/7/78/Google_Play_Store_badge_EN.svg" alt="Get it on Google Play">
+                </a>
+                <a href="#" class="store-btn" id="appStoreBtnCta">
+                    <img src="https://developer.apple.com/assets/elements/badges/download-on-the-app-store.svg" alt="Download on App Store">
+                </a>
+            </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Form Modal -->
+    <div class="modal-overlay" id="contactModal">
+        <div class="modal-content contact-modal">
+            <button class="modal-close-x" id="contactCloseX">&times;</button>
+            <h3>Contact Us</h3>
+            <p>Have questions or feedback? We'd love to hear from you!</p>
+            <form class="contact-form" id="contactForm">
+                <input type="text" name="name" placeholder="Your Name" required id="contactName">
+                <input type="email" name="email" placeholder="Your Email" required id="contactEmail">
+                <textarea name="message" placeholder="Your Message" rows="4" required id="contactMessage"></textarea>
+                <button type="submit" class="submit-btn">Send Message</button>
+            </form>
+            <p class="contact-alt">Or email us directly: <a href="mailto:snapfit.ai.official@gmail.com">snapfit.ai.official@gmail.com</a></p>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-brand">
+                    <img src="Resources/Logo.png" alt="SnapFit Logo">
+                    <span>SnapFit</span>
+                </div>
+                <div class="footer-links">
+                    <a href="https://sites.google.com/view/snapfit-ai-privacy-policy" target="_blank">Privacy Policy</a>
+                    <span>•</span>
+                    <a href="terms.html">Terms & Conditions</a>
+                    <span>•</span>
+                    <a href="#" id="contactBtnFooter">Contact Us</a>
+                </div>
+                <p class="copyright">&copy; 2025 SnapFit. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
