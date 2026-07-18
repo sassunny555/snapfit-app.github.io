@@ -40,65 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
     
-    // ===== Contact Form Modal =====
-    const contactModal = document.getElementById('contactModal');
-    const contactBtn = document.getElementById('contactBtn');
-    const contactBtnFooter = document.getElementById('contactBtnFooter');
-    const contactCloseX = document.getElementById('contactCloseX');
-    
-    const showContactModal = (e) => {
-        e.preventDefault();
-        contactModal.classList.add('active');
-    };
-    
-    const hideContactModal = () => {
-        contactModal.classList.remove('active');
-    };
-    
-    if (contactBtn) contactBtn.addEventListener('click', showContactModal);
-    if (contactBtnFooter) contactBtnFooter.addEventListener('click', showContactModal);
-    if (contactCloseX) contactCloseX.addEventListener('click', hideContactModal);
-    
-    // Close contact modal on overlay click
-    if (contactModal) {
-        contactModal.addEventListener('click', (e) => {
-            if (e.target === contactModal) hideContactModal();
-        });
-    }
-    
-    // Handle contact form submission via mailto
-    const contactForm = document.getElementById('contactForm');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            
-            const name = document.getElementById('contactName').value;
-            const email = document.getElementById('contactEmail').value;
-            const message = document.getElementById('contactMessage').value;
-            
-            const subject = encodeURIComponent(`SnapFit Contact: Message from ${name}`);
-            const body = encodeURIComponent(`Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`);
-            
-            // Open default email client
-            window.location.href = `mailto:snapfit.ai.official@gmail.com?subject=${subject}&body=${body}`;
-            
-            // Reset form and show feedback
-            const submitBtn = contactForm.querySelector('.submit-btn');
-            submitBtn.textContent = 'Opening Email...';
-            
-            setTimeout(() => {
-                contactForm.reset();
-                hideContactModal();
-                submitBtn.textContent = 'Send Message';
-            }, 1500);
-        });
-    }
-    
     // Close modals on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
             if (modal && modal.classList.contains('active')) hideModal();
-            if (contactModal && contactModal.classList.contains('active')) hideContactModal();
         }
     });
     
