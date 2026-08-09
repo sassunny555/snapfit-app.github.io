@@ -10,15 +10,21 @@ document.addEventListener('DOMContentLoaded', () => {
     // Duplicate screenshots carousel
     const track = document.querySelector('.carousel-track');
     if (track) {
-        const items = track.innerHTML;
-        track.innerHTML = items + items;
+        [...track.children].forEach((item) => {
+            const clone = item.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            track.appendChild(clone);
+        });
     }
     
     // Duplicate reviews carousel
     const reviewsTrack = document.querySelector('.reviews-track');
     if (reviewsTrack) {
-        const items = reviewsTrack.innerHTML;
-        reviewsTrack.innerHTML = items + items;
+        [...reviewsTrack.children].forEach((item) => {
+            const clone = item.cloneNode(true);
+            clone.setAttribute('aria-hidden', 'true');
+            reviewsTrack.appendChild(clone);
+        });
     }
     
     // ===== Coming Soon Modal =====
@@ -30,10 +36,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const showModal = (e) => {
         e.preventDefault();
         modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+        modalClose?.focus();
     };
     
     const hideModal = () => {
         modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
     };
     
     if (appStoreBtn) appStoreBtn.addEventListener('click', showModal);
@@ -60,6 +69,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ...document.querySelectorAll('.section-subtitle'),
         ...document.querySelectorAll('.benefit-panel'),
         document.querySelector('.comparison-shell'),
+        document.querySelector('.faq-list'),
         document.querySelector('.screenshots-carousel'),
         document.querySelector('.reviews-carousel'),
         document.querySelector('.ph-embed'),
@@ -90,6 +100,24 @@ document.addEventListener('DOMContentLoaded', () => {
         comparisonShell.classList.add('reveal-on-scroll', 'reveal-panel');
         comparisonShell.style.setProperty('--reveal-delay', '120ms');
     }
+
+    const faqList = document.querySelector('.faq-list');
+    if (faqList) {
+        faqList.classList.add('reveal-on-scroll', 'reveal-panel');
+        faqList.style.setProperty('--reveal-delay', '120ms');
+    }
+
+    // ===== FAQ accordion =====
+    const faqItems = [...document.querySelectorAll('.faq-item')];
+
+    faqItems.forEach((item) => {
+        item.addEventListener('toggle', () => {
+            if (!item.open) return;
+            faqItems.forEach((otherItem) => {
+                if (otherItem !== item) otherItem.open = false;
+            });
+        });
+    });
 
     // ===== Interactive comparison filters =====
     const comparisonFilters = document.querySelectorAll('.comparison-filter');

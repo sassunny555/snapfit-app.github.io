@@ -17,6 +17,7 @@
     --border-light: rgba(0, 102, 238, 0.1);
     --border-radius: 18px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --section-title-size: clamp(2rem, 3.6vw, 3rem);
 }
 
 /* ===== Reset & Base ===== */
@@ -502,6 +503,12 @@ body.nav-scrolled .hero .nav-cta:hover {
         animation: none !important;
         transition: none !important;
     }
+
+    .faq-answer,
+    .faq-answer p,
+    .faq-plus {
+        transition: none !important;
+    }
 }
 
 /* ===== Store Buttons ===== */
@@ -656,9 +663,11 @@ body.nav-scrolled .hero .nav-cta:hover {
 
 .section-title {
     text-align: center;
-    font-size: clamp(1.4rem, 3vw, 1.9rem);
+    font-size: var(--section-title-size);
     font-weight: 700;
-    margin-bottom: 6px;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    margin-bottom: 12px;
     color: var(--text-primary);
 }
 
@@ -900,10 +909,6 @@ body.nav-scrolled .hero .nav-cta:hover {
 
 .comparison-heading .section-title {
     margin-bottom: 14px;
-    font-size: clamp(2.15rem, 4.5vw, 3.65rem);
-    font-weight: 700;
-    line-height: 1.04;
-    letter-spacing: -0.05em;
     color: #1d1d1f;
 }
 
@@ -1214,6 +1219,170 @@ body.nav-scrolled .hero .nav-cta:hover {
     margin-top: 24px;
 }
 
+/* ===== FAQ Section ===== */
+.faq-section {
+    padding: 100px 0 108px;
+    background: #f5f5f7;
+}
+
+.faq-container {
+    max-width: 920px;
+}
+
+.faq-heading {
+    max-width: 760px;
+    margin: 0 auto 34px;
+    text-align: center;
+}
+
+.faq-eyebrow {
+    display: inline-flex;
+    margin-bottom: 14px;
+    padding: 6px 11px;
+    border-radius: 999px;
+    background: rgba(0, 102, 238, 0.08);
+    color: #0066cc;
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+.faq-heading h2 {
+    margin-bottom: 16px;
+    color: #1d1d1f;
+    font-size: var(--section-title-size);
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+}
+
+.faq-heading p {
+    color: #6e6e73;
+    font-size: 1.03rem;
+    line-height: 1.6;
+}
+
+.faq-list {
+    overflow: hidden;
+    border: 1px solid rgba(0, 0, 0, 0.07);
+    border-radius: 28px;
+    background: rgba(255, 255, 255, 0.88);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.06);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.faq-item {
+    border-bottom: 1px solid #e5e5ea;
+}
+
+.faq-item:last-child {
+    border-bottom: 0;
+}
+
+.faq-item summary {
+    min-height: 76px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 20px 26px;
+    color: #1d1d1f;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.35;
+    cursor: pointer;
+    list-style: none;
+    transition: color 200ms ease, background 200ms ease;
+}
+
+.faq-item summary::-webkit-details-marker {
+    display: none;
+}
+
+.faq-item summary:hover {
+    background: rgba(0, 0, 0, 0.018);
+    color: #0066cc;
+}
+
+.faq-item summary:focus-visible {
+    outline: 3px solid rgba(0, 113, 227, 0.22);
+    outline-offset: -3px;
+}
+
+.faq-plus {
+    width: 30px;
+    height: 30px;
+    display: block;
+    flex: 0 0 auto;
+    border-radius: 50%;
+    background: #f2f2f7;
+    position: relative;
+    transition: transform 350ms cubic-bezier(0.16, 1, 0.3, 1), background 200ms ease;
+}
+
+.faq-plus::before,
+.faq-plus::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 12px;
+    height: 1.5px;
+    border-radius: 999px;
+    background: #3a3a3c;
+    transform: translate(-50%, -50%);
+}
+
+.faq-plus::after {
+    transform: translate(-50%, -50%) rotate(90deg);
+}
+
+.faq-item[open] .faq-plus {
+    background: #e8f2ff;
+    transform: rotate(45deg);
+}
+
+.faq-answer {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq-answer > div {
+    overflow: hidden;
+}
+
+.faq-answer p {
+    max-width: 760px;
+    padding: 0 72px 24px 26px;
+    color: #6e6e73;
+    font-size: 0.94rem;
+    line-height: 1.65;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 260ms ease, transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.faq-answer a {
+    color: #0066cc;
+    text-decoration: none;
+}
+
+.faq-answer a:hover {
+    text-decoration: underline;
+}
+
+.faq-item[open] .faq-answer {
+    grid-template-rows: 1fr;
+}
+
+.faq-item[open] .faq-answer p {
+    opacity: 1;
+    transform: translateY(0);
+}
+
 /* ===== CTA Section ===== */
 .cta {
     padding: 42px 0;
@@ -1256,10 +1425,11 @@ body.nav-scrolled .hero .nav-cta:hover {
 }
 
 .cta-content h2 {
-    font-size: clamp(1.45rem, 3vw, 2rem);
+    font-size: var(--section-title-size);
     font-weight: 700;
-    line-height: 1.2;
-    margin-bottom: 8px;
+    line-height: 1.05;
+    letter-spacing: -0.045em;
+    margin-bottom: 12px;
     color: #ffffff;
 }
 
@@ -1444,6 +1614,10 @@ body.nav-scrolled .hero .nav-cta:hover {
 }
 
 @media (max-width: 768px) {
+    :root {
+        --section-title-size: clamp(1.9rem, 8.5vw, 2.3rem);
+    }
+
     .hero {
         min-height: max(780px, 100svh);
         background:
@@ -1689,6 +1863,39 @@ body.nav-scrolled .hero .nav-cta:hover {
         margin-top: 14px;
         text-align: left;
     }
+
+    .faq-section {
+        padding: 70px 0 76px;
+    }
+
+    .faq-heading {
+        margin-bottom: 26px;
+    }
+
+    .faq-heading p {
+        font-size: 0.96rem;
+    }
+
+    .faq-list {
+        border-radius: 22px;
+    }
+
+    .faq-item summary {
+        min-height: 68px;
+        gap: 16px;
+        padding: 17px 18px;
+        font-size: 0.96rem;
+    }
+
+    .faq-plus {
+        width: 28px;
+        height: 28px;
+    }
+
+    .faq-answer p {
+        padding: 0 58px 21px 18px;
+        font-size: 0.9rem;
+    }
     
     .reviews {
         padding: 40px 0;
@@ -1798,10 +2005,6 @@ body.nav-scrolled .hero .nav-cta:hover {
 
     .cta-content {
         padding: 28px 18px 0;
-    }
-
-    .cta-content h2 {
-        font-size: 1.45rem;
     }
 
     .cta-content p {
