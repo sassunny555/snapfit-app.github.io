@@ -329,6 +329,8 @@ body.nav-scrolled .hero .nav-cta:hover {
     right: -15%;
     bottom: 6%;
     width: clamp(600px, 55vw, 820px);
+    height: auto;
+    aspect-ratio: 3 / 2;
     max-width: none;
     z-index: 2;
     border-radius: 28px 0 0 0;
@@ -526,6 +528,7 @@ body.nav-scrolled .hero .nav-cta:hover {
 }
 
 .store-btn img {
+    width: auto;
     height: 42px;
     border-radius: 8px;
 }
