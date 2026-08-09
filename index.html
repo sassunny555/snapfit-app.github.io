@@ -56,11 +56,7 @@
             </div>
 
             <div class="hero-visual" aria-hidden="true">
-                <img class="hero-phone" src="Resources/Hero Section/phone.png" alt="">
-                <img class="hero-girl" src="Resources/Hero Section/girl.png" alt="">
-                <img class="hero-card hero-card-weight" src="Resources/Hero Section/weight.png" alt="">
-                <img class="hero-card hero-card-water" src="Resources/Hero Section/water.png" alt="">
-                <img class="hero-card hero-card-streak" src="Resources/Hero Section/streak.png" alt="">
+                <img class="hero-transformation" src="Resources/Hero Section/transformation.png" alt="">
             </div>
         </div>
     </section>
@@ -106,58 +102,118 @@
         </div>
     </section>
 
-    <!-- Features Section -->
-    <section class="features" id="features">
+    <!-- Benefits Showcase Section -->
+    <section class="benefits-showcase" aria-labelledby="benefits-title">
         <div class="container">
-            <h2 class="section-title">Why SnapFit?</h2>
-            <p class="section-subtitle">Everything you need to achieve your health goals</p>
-            
-            <div class="features-grid">
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path>
-                            <circle cx="12" cy="13" r="4"></circle>
-                        </svg>
-                    </div>
-                    <h3>AI Meal Scanning</h3>
-                    <p>Snap a photo and let AI identify your food instantly.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"></path>
-                        </svg>
-                    </div>
-                    <h3>Water Tracking</h3>
-                    <p>Stay hydrated with easy logging and daily goals.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M3 3v18h18"></path>
-                            <path d="M18 17V9"></path>
-                            <path d="M13 17V5"></path>
-                            <path d="M8 17v-3"></path>
-                        </svg>
-                    </div>
-                    <h3>Progress Tracking</h3>
-                    <p>Visualize trends with beautiful analytics.</p>
-                </div>
-                
-                <div class="feature-card">
-                    <div class="feature-icon">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <path d="M6 13.87A4 4 0 0 1 7.41 6a5.11 5.11 0 0 1 1.05-1.54 5 5 0 0 1 7.08 0A5.11 5.11 0 0 1 16.59 6 4 4 0 0 1 18 13.87V21H6Z"></path>
-                            <line x1="6" y1="17" x2="18" y2="17"></line>
-                        </svg>
-                    </div>
-                    <h3>Smart Recipes</h3>
-                    <p>Discover healthy meals with full nutrition info.</p>
-                </div>
+            <div class="benefits-heading">
+                <h2 class="section-title" id="benefits-title">Small habits. Meaningful progress.</h2>
+                <p class="section-subtitle">The daily insights that keep your health journey moving forward.</p>
             </div>
+
+            <div class="benefit-panels">
+                <article class="benefit-panel benefit-panel-progress">
+                    <div class="benefit-copy">
+                        <span class="benefit-kicker">Progress that feels real</span>
+                        <h3>See how far you’ve come</h3>
+                        <p>Follow your weight trend over time and turn every small improvement into clear, visible momentum.</p>
+                    </div>
+                    <div class="benefit-visual">
+                        <img src="Resources/Hero Section/weight.png" alt="Monthly weight-loss progress card showing 8.6 kilograms lost">
+                    </div>
+                </article>
+
+                <article class="benefit-panel benefit-panel-water">
+                    <div class="benefit-copy">
+                        <span class="benefit-kicker">Hydration made simple</span>
+                        <h3>Reach your water goal</h3>
+                        <p>Log every glass in seconds, stay aware throughout the day, and build a hydration habit that lasts.</p>
+                    </div>
+                    <div class="benefit-visual">
+                        <img src="Resources/Hero Section/water.png" alt="Daily hydration card showing a goal of eight glasses of water">
+                    </div>
+                </article>
+
+                <article class="benefit-panel benefit-panel-streak">
+                    <div class="benefit-copy">
+                        <span class="benefit-kicker">Consistency wins</span>
+                        <h3>Keep your healthy streak alive</h3>
+                        <p>Celebrate the days you show up, stay motivated by your momentum, and make healthy choices feel automatic.</p>
+                    </div>
+                    <div class="benefit-visual">
+                        <img src="Resources/Hero Section/streak.png" alt="Healthy habit card showing a 320-day streak">
+                    </div>
+                </article>
+            </div>
+        </div>
+    </section>
+
+    <!-- Comparison Section -->
+    <section class="comparison-section" id="features" aria-labelledby="comparison-title">
+        <div class="container">
+            <div class="comparison-heading">
+                <span class="comparison-eyebrow">The SnapFit difference</span>
+                <h2 class="section-title" id="comparison-title">A simpler take on nutrition tracking</h2>
+                <p class="section-subtitle">Every app has a different strength. SnapFit brings scanning, daily habits, and progress together in one focused experience.</p>
+            </div>
+
+            <div class="comparison-filters" role="group" aria-label="Filter comparison apps">
+                <button class="comparison-filter active" type="button" data-filter="all" aria-pressed="true">All apps</button>
+                <button class="comparison-filter" type="button" data-filter="ai" aria-pressed="false">AI-first</button>
+                <button class="comparison-filter" type="button" data-filter="advanced" aria-pressed="false">Detailed tracking</button>
+            </div>
+
+            <div class="comparison-shell">
+                <table class="comparison-table">
+                    <caption>How SnapFit approaches common gaps across popular nutrition-tracking apps</caption>
+                    <thead>
+                        <tr>
+                            <th scope="col">App</th>
+                            <th scope="col">Known for</th>
+                            <th scope="col">Common trade-off</th>
+                            <th scope="col" class="snapfit-column">SnapFit approach</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="comparison-row" data-category="mainstream" tabindex="0">
+                            <th scope="row" data-label="App"><span>MyFitnessPal</span></th>
+                            <td data-label="Known for">Large food database and broad recognition.</td>
+                            <td data-label="Common trade-off">Logging can feel manual and feature-dense.</td>
+                            <td data-label="SnapFit approach" class="snapfit-cell">Faster visual logging with a calmer daily flow.</td>
+                        </tr>
+                        <tr class="comparison-row" data-category="mainstream" tabindex="0">
+                            <th scope="row" data-label="App"><span>Lose It!</span></th>
+                            <td data-label="Known for">Approachable calorie and weight tracking.</td>
+                            <td data-label="Common trade-off">AI and visual insights may feel secondary.</td>
+                            <td data-label="SnapFit approach" class="snapfit-cell">An AI-first experience built around the camera.</td>
+                        </tr>
+                        <tr class="comparison-row" data-category="ai" tabindex="0">
+                            <th scope="row" data-label="App"><span>Cal AI</span></th>
+                            <td data-label="Known for">Fast photo-based calorie estimates.</td>
+                            <td data-label="Common trade-off">The experience can center mainly on scanning.</td>
+                            <td data-label="SnapFit approach" class="snapfit-cell">Scanning plus water, recipes, trends, and streaks.</td>
+                        </tr>
+                        <tr class="comparison-row" data-category="ai" tabindex="0">
+                            <th scope="row" data-label="App"><span>SnapCalorie</span></th>
+                            <td data-label="Known for">AI-powered meal recognition.</td>
+                            <td data-label="Common trade-off">Broader habit-building may be less central.</td>
+                            <td data-label="SnapFit approach" class="snapfit-cell">A complete daily nutrition companion.</td>
+                        </tr>
+                        <tr class="comparison-row" data-category="advanced" tabindex="0">
+                            <th scope="row" data-label="App"><span>Cronometer</span></th>
+                            <td data-label="Known for">Detailed nutrient and micronutrient tracking.</td>
+                            <td data-label="Common trade-off">Depth can feel complex for casual users.</td>
+                            <td data-label="SnapFit approach" class="snapfit-cell">The essentials surfaced with less friction.</td>
+                        </tr>
+                        <tr class="comparison-row" data-category="advanced" tabindex="0">
+                            <th scope="row" data-label="App"><span>MacroFactor</span></th>
+                            <td data-label="Known for">Macro coaching and analytical guidance.</td>
+                            <td data-label="Common trade-off">Often better suited to advanced fitness goals.</td>
+                            <td data-label="SnapFit approach" class="snapfit-cell">Friendly calorie awareness for everyday users.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="comparison-note">Product capabilities and availability can change. This is a high-level positioning comparison, not a claim of superiority in every category.</p>
         </div>
     </section>
 

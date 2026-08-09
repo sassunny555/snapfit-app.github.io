@@ -54,66 +54,99 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
-    // ===== Smooth reveal animations on scroll =====
-    const observerOptions = {
-        threshold: 0.1,
-        rootMargin: '0px 0px -50px 0px'
-    };
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.classList.add('visible');
-            }
-        });
-    }, observerOptions);
-    
-    // Observe feature cards with staggered animation
-    document.querySelectorAll('.feature-card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        card.style.transitionDelay = `${index * 0.1}s`;
-        observer.observe(card);
+    // ===== Coordinated one-time scroll reveals =====
+    const revealTargets = [
+        ...document.querySelectorAll('.section-title'),
+        ...document.querySelectorAll('.section-subtitle'),
+        ...document.querySelectorAll('.benefit-panel'),
+        document.querySelector('.comparison-shell'),
+        document.querySelector('.screenshots-carousel'),
+        document.querySelector('.reviews-carousel'),
+        document.querySelector('.ph-embed'),
+        document.querySelector('.cta-content')
+    ].filter(Boolean);
+
+    document.querySelectorAll('.section-title').forEach((element) => {
+        element.classList.add('reveal-on-scroll', 'reveal-heading');
     });
-    
-    // Observe review cards with staggered animation
-    document.querySelectorAll('.review-card').forEach((card, index) => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(30px)';
-        card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-        card.style.transitionDelay = `${index * 0.1}s`;
-        observer.observe(card);
+
+    document.querySelectorAll('.section-subtitle').forEach((element) => {
+        element.classList.add('reveal-on-scroll');
+        element.style.setProperty('--reveal-delay', '90ms');
     });
-    
-    // Observe section titles
-    document.querySelectorAll('.section-title, .section-subtitle').forEach((el) => {
-        el.style.opacity = '0';
-        el.style.transform = 'translateY(20px)';
-        el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-        observer.observe(el);
+
+    document.querySelectorAll('.benefit-panel').forEach((panel, index) => {
+        panel.classList.add('split-reveal');
+        panel.style.setProperty('--reveal-delay', `${index * 90}ms`);
     });
-    
-    // Observe CTA section
-    const ctaContent = document.querySelector('.cta-content');
-    if (ctaContent) {
-        ctaContent.style.opacity = '0';
-        ctaContent.style.transform = 'translateY(30px)';
-        ctaContent.style.transition = 'opacity 0.7s ease, transform 0.7s ease';
-        observer.observe(ctaContent);
+
+    document.querySelectorAll('.screenshots-carousel, .reviews-carousel').forEach((panel) => {
+        panel.classList.add('reveal-on-scroll', 'reveal-panel');
+        panel.style.setProperty('--reveal-delay', '140ms');
+    });
+
+    const comparisonShell = document.querySelector('.comparison-shell');
+    if (comparisonShell) {
+        comparisonShell.classList.add('reveal-on-scroll', 'reveal-panel');
+        comparisonShell.style.setProperty('--reveal-delay', '120ms');
     }
-    
-    // Add visible class styles
-    const style = document.createElement('style');
-    style.textContent = `
-        .feature-card.visible,
-        .review-card.visible,
-        .section-title.visible,
-        .section-subtitle.visible,
-        .cta-content.visible {
-            opacity: 1 !important;
-            transform: translateY(0) !important;
-        }
-    `;
-    document.head.appendChild(style);
+
+    // ===== Interactive comparison filters =====
+    const comparisonFilters = document.querySelectorAll('.comparison-filter');
+    const comparisonRows = document.querySelectorAll('.comparison-row');
+    let activeComparisonFilter = 'all';
+
+    comparisonFilters.forEach((button) => {
+        button.addEventListener('click', () => {
+            activeComparisonFilter = button.dataset.filter || 'all';
+
+            comparisonFilters.forEach((filterButton) => {
+                const isActive = filterButton === button;
+                filterButton.classList.toggle('active', isActive);
+                filterButton.setAttribute('aria-pressed', String(isActive));
+            });
+
+            let visibleIndex = 0;
+            comparisonRows.forEach((row) => {
+                const shouldShow = activeComparisonFilter === 'all' || row.dataset.category === activeComparisonFilter;
+                row.classList.remove('is-filtering-in');
+
+                if (shouldShow) {
+                    row.hidden = false;
+                    row.classList.remove('is-filtering-out');
+                    row.style.setProperty('--row-delay', `${visibleIndex * 70}ms`);
+                    void row.offsetWidth;
+                    row.classList.add('is-filtering-in');
+                    visibleIndex += 1;
+                } else {
+                    row.classList.add('is-filtering-out');
+                    window.setTimeout(() => {
+                        const stillHidden = activeComparisonFilter !== 'all' && row.dataset.category !== activeComparisonFilter;
+                        if (stillHidden) row.hidden = true;
+                    }, 260);
+                }
+            });
+        });
+    });
+
+    document.querySelectorAll('.ph-embed, .cta-content').forEach((panel) => {
+        panel.classList.add('reveal-on-scroll', 'reveal-card');
+    });
+
+    if ('IntersectionObserver' in window) {
+        const revealObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach((entry) => {
+                if (!entry.isIntersecting) return;
+                entry.target.classList.add('is-revealed');
+                observer.unobserve(entry.target);
+            });
+        }, {
+            threshold: 0.05,
+            rootMargin: '0px 0px -8% 0px'
+        });
+
+        revealTargets.forEach((target) => revealObserver.observe(target));
+    } else {
+        revealTargets.forEach((target) => target.classList.add('is-revealed'));
+    }
 });
