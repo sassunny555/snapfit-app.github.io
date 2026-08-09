@@ -99,8 +99,9 @@ body {
 }
 
 .logo img {
-    width: 36px;
+    width: auto;
     height: 36px;
+    object-fit: contain;
 }
 
 .nav-links {
@@ -1490,8 +1491,9 @@ body.nav-scrolled .hero .nav-cta:hover {
 }
 
 .footer-brand img {
-    width: 24px;
+    width: auto;
     height: 24px;
+    object-fit: contain;
 }
 
 .copyright {
@@ -1955,7 +1957,7 @@ body.nav-scrolled .hero .nav-cta:hover {
     }
 
     .logo img {
-        width: 32px;
+        width: auto;
         height: 32px;
     }
 
