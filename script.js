@@ -1,5 +1,12 @@
 // ===== Duplicate carousel items for infinite scroll =====
 document.addEventListener('DOMContentLoaded', () => {
+    const updateNavState = () => {
+        document.body.classList.toggle('nav-scrolled', window.scrollY > 24);
+    };
+
+    updateNavState();
+    window.addEventListener('scroll', updateNavState, { passive: true });
+
     // Duplicate screenshots carousel
     const track = document.querySelector('.carousel-track');
     if (track) {
