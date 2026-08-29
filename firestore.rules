@@ -1,0 +1,11 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Promo inventory contains redeemable codes and abuse-prevention records.
+    // Every read and write must go through a trusted Cloud Function.
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

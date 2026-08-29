@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex, nofollow, noarchive">
+  <meta name="theme-color" content="#0066ee">
+  <title>SnapFit Promotion Admin</title>
+  <link rel="icon" type="image/png" href="../Resources/Logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="promo.css">
+</head>
+<body class="admin-body">
+  <header class="promo-header">
+    <a class="brand" href="../index.html" aria-label="SnapFit home">
+      <img src="../Resources/Logo.png" alt="" width="650" height="720">
+      <span>SnapFit Admin</span>
+    </a>
+    <a class="back-link" href="./">View promotion</a>
+  </header>
+
+  <main>
+    <section id="authPanel" class="admin-card auth-card">
+      <div class="brand"><img src="../Resources/Logo.png" alt="" width="650" height="720"><span>SnapFit</span></div>
+      <h1>Promotion admin</h1>
+      <p>Sign in with an authorized Google account to manage campaigns and Premium inventory.</p>
+      <button id="signInButton" class="primary-button" type="button">Continue with Google</button>
+      <p id="authMessage" class="admin-message error" role="alert"></p>
+    </section>
+
+    <section id="adminPanel" class="admin-main" hidden>
+      <div class="admin-title-row">
+        <div>
+          <span class="eyebrow">Secure inventory console</span>
+          <h1>Premium promotion</h1>
+          <p id="signedInText"></p>
+        </div>
+        <button id="signOutButton" class="secondary-button" type="button">Sign out</button>
+      </div>
+
+      <div class="admin-grid">
+        <div class="admin-stack">
+          <article class="admin-card">
+            <h2>Campaign settings</h2>
+            <p>Pause claims before editing inventory or preparing a future drop.</p>
+            <form id="campaignForm">
+              <div class="admin-field">
+                <label for="campaignId">Campaign ID</label>
+                <input id="campaignId" type="text" readonly>
+              </div>
+              <div class="admin-field">
+                <label for="campaignName">Campaign name</label>
+                <input id="campaignName" type="text" maxlength="100" value="SnapFit Premium Launch" required>
+              </div>
+              <div class="switch-row">
+                <span>Accept new claims</span>
+                <label class="switch">
+                  <input id="campaignActive" type="checkbox">
+                  <span class="switch-track"></span>
+                </label>
+              </div>
+              <div class="admin-actions">
+                <button class="primary-button" type="submit">Save campaign</button>
+              </div>
+              <p id="campaignMessage" class="admin-message" role="status"></p>
+            </form>
+          </article>
+
+          <article class="admin-card">
+            <h2>Import promo codes</h2>
+            <p>Paste one code per line or separate codes with commas. Duplicates are ignored automatically.</p>
+            <form id="importForm">
+              <div class="admin-field">
+                <label for="codeInput">Premium codes</label>
+                <textarea id="codeInput" spellcheck="false" placeholder="SNAPFIT-PREMIUM-001&#10;SNAPFIT-PREMIUM-002" required></textarea>
+              </div>
+              <div class="admin-actions">
+                <button class="primary-button" id="importButton" type="submit">Import codes</button>
+              </div>
+              <p id="importMessage" class="admin-message" role="status"></p>
+            </form>
+          </article>
+        </div>
+
+        <article class="admin-card">
+          <h2>Inventory</h2>
+          <p>Claimed codes are immutable. Only available codes can be removed.</p>
+          <div class="stats-grid">
+            <div class="stat-card"><strong id="availableCount">0</strong><span>Available</span></div>
+            <div class="stat-card"><strong id="claimedCount">0</strong><span>Claimed</span></div>
+          </div>
+          <div class="table-toolbar">
+            <div class="tabs" role="tablist" aria-label="Code status">
+              <button class="tab-button active" type="button" data-status="available" role="tab" aria-selected="true">Available</button>
+              <button class="tab-button" type="button" data-status="claimed" role="tab" aria-selected="false">Claimed</button>
+            </div>
+            <div class="admin-actions">
+              <button id="refreshButton" class="secondary-button" type="button">Refresh</button>
+              <button id="deleteButton" class="secondary-button danger-button" type="button">Delete selected</button>
+            </div>
+          </div>
+          <div class="code-table-wrap">
+            <table class="code-table">
+              <thead><tr><th><span class="visually-hidden">Select</span></th><th>Code</th><th>Status</th><th>Time</th></tr></thead>
+              <tbody id="codeRows"><tr><td colspan="4">Sign in to load inventory.</td></tr></tbody>
+            </table>
+          </div>
+          <p id="inventoryMessage" class="admin-message" role="status"></p>
+        </article>
+      </div>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
