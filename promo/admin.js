@@ -26,6 +26,8 @@ const elements = {
   importMessage: document.getElementById("importMessage"),
   availableCount: document.getElementById("availableCount"),
   claimedCount: document.getElementById("claimedCount"),
+  blockedCount: document.getElementById("blockedCount"),
+  protectionSummary: document.getElementById("protectionSummary"),
   rows: document.getElementById("codeRows"),
   refresh: document.getElementById("refreshButton"),
   delete: document.getElementById("deleteButton"),
@@ -116,9 +118,15 @@ async function loadCodes() {
   }
 }
 
+async function loadAbuseSummary() {
+  const { data } = await promoApi.getAbuseSummary({ campaignId: PROMO_CAMPAIGN_ID });
+  elements.blockedCount.textContent = (data.blockedLast24Hours || 0).toLocaleString();
+  elements.protectionSummary.textContent = `Active: 1 claim per browser, up to ${data.protections.maxClaimsPerIp} per network, and ${data.protections.maxAttemptsPerTenMinutes} attempts per 10 minutes.`;
+}
+
 async function refreshDashboard() {
   try {
-    await Promise.all([loadCampaign(), loadCodes()]);
+    await Promise.all([loadCampaign(), loadCodes(), loadAbuseSummary()]);
   } catch (error) {
     const message = errorText(error);
     setMessage(elements.inventoryMessage, message, true);

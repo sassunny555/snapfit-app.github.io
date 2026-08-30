@@ -1,16 +1,21 @@
-const { createHash, createHmac } = require("node:crypto");
+const { createHash, createHmac, randomBytes, timingSafeEqual } = require("node:crypto");
 const { cert, getApps, initializeApp } = require("firebase-admin/app");
 const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "snapfit-web-820e0";
 const MAX_CODES_PER_IMPORT = 400;
 const MAX_CLAIMS_PER_IP = 3;
+const MAX_CLAIM_ATTEMPTS_PER_WINDOW = 8;
+const CLAIM_ATTEMPT_WINDOW_MS = 10 * 60 * 1000;
+const CLAIM_COOKIE_NAME = "snapfit_promo_visitor";
+const CLAIM_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
 const CAMPAIGN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{2,63}$/;
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{2,79}$/;
 const ADMIN_ACTIONS = new Set([
   "adminSaveCampaign",
   "adminImportCodes",
   "adminListCodes",
+  "adminGetAbuseSummary",
   "adminDeleteAvailableCodes"
 ]);
 
@@ -91,6 +96,73 @@ function privateHash(type, value) {
   return createHmac("sha256", secret).update(`${type}:${value}`).digest("hex");
 }
 
+function parseCookies(req) {
+  return String(req.headers.cookie || "").split(";").reduce((cookies, item) => {
+    const separator = item.indexOf("=");
+    if (separator < 1) return cookies;
+    const key = item.slice(0, separator).trim();
+    const value = item.slice(separator + 1).trim();
+    if (key) cookies[key] = value;
+    return cookies;
+  }, {});
+}
+
+function signVisitorId(visitorId) {
+  return createHmac("sha256", process.env.CLAIM_HASH_SECRET).update(`cookie:${visitorId}`).digest("base64url");
+}
+
+function verifiedVisitorId(req) {
+  const value = parseCookies(req)[CLAIM_COOKIE_NAME];
+  if (!value) return null;
+  const [visitorId, signature] = value.split(".");
+  if (!/^[a-f0-9]{64}$/.test(visitorId || "") || !signature) return null;
+  const expected = Buffer.from(signVisitorId(visitorId));
+  const supplied = Buffer.from(signature);
+  return expected.length === supplied.length && timingSafeEqual(expected, supplied) ? visitorId : null;
+}
+
+function visitorCookie(visitorId) {
+  return `${CLAIM_COOKIE_NAME}=${visitorId}.${signVisitorId(visitorId)}; Path=/; Max-Age=${CLAIM_COOKIE_MAX_AGE}; HttpOnly; Secure; SameSite=Lax`;
+}
+
+async function checkClaimRateLimit(campaignId, ipHash) {
+  const firestore = db();
+  const rateRef = firestore.collection("promoRateLimits").doc(`${campaignId}_${ipHash}`);
+  const now = Timestamp.now();
+  return firestore.runTransaction(async (transaction) => {
+    const snapshot = await transaction.get(rateRef);
+    const current = snapshot.data();
+    const windowStart = current?.windowStart?.toMillis?.() || 0;
+    const inCurrentWindow = now.toMillis() - windowStart < CLAIM_ATTEMPT_WINDOW_MS;
+    const attempts = inCurrentWindow ? (Number(current.attempts) || 0) + 1 : 1;
+    transaction.set(rateRef, {
+      campaignId,
+      attempts,
+      windowStart: inCurrentWindow ? current.windowStart : now,
+      updatedAt: now
+    });
+    return attempts <= MAX_CLAIM_ATTEMPTS_PER_WINDOW;
+  });
+}
+
+async function recordBlockedClaim(data, req, error) {
+  try {
+    const campaignId = typeof data?.campaignId === "string" && CAMPAIGN_ID_PATTERN.test(data.campaignId.toLowerCase())
+      ? data.campaignId.toLowerCase()
+      : "unknown";
+    const rawDeviceId = typeof data?.deviceId === "string" ? data.deviceId : "unknown";
+    await db().collection("promoBlockedAttempts").add({
+      campaignId,
+      reason: error.code || "rejected",
+      deviceHash: privateHash("device", rawDeviceId.slice(0, 100)),
+      ipHash: privateHash("ip", clientIp(req)),
+      blockedAt: Timestamp.now()
+    });
+  } catch (auditError) {
+    console.error("Could not record blocked promo attempt", auditError);
+  }
+}
+
 function stableCodeId(campaignId, code) {
   return createHash("sha256").update(`${campaignId}:${code}`).digest("hex");
 }
@@ -146,30 +218,36 @@ async function getPromoStatus(data) {
   };
 }
 
-async function claimPromo(data, req) {
+async function claimPromo(data, req, visitorId) {
   const campaignId = normalizeCampaignId(data.campaignId);
   const claimantName = normalizeName(data.name);
   const deviceId = normalizeDeviceId(data.deviceId);
   const deviceHash = privateHash("device", deviceId);
   const ipHash = privateHash("ip", clientIp(req));
+  if (!(await checkClaimRateLimit(campaignId, ipHash))) {
+    throw new ApiError(429, "rate-limited", "Too many claim attempts. Please wait before trying again.");
+  }
   const firestore = db();
   const campaignRef = firestore.collection("promoCampaigns").doc(campaignId);
   const deviceLockRef = firestore.collection("promoClaimLocks").doc(`${campaignId}_device_${deviceHash}`);
+  const visitorHash = privateHash("visitor", visitorId);
+  const visitorLockRef = firestore.collection("promoClaimLocks").doc(`${campaignId}_visitor_${visitorHash}`);
   const ipStatRef = firestore.collection("promoIpStats").doc(`${campaignId}_${ipHash}`);
   const claimRef = firestore.collection("promoClaims").doc();
   const now = Timestamp.now();
 
   return firestore.runTransaction(async (transaction) => {
-    const [campaignSnapshot, deviceLock, ipStat] = await Promise.all([
+    const [campaignSnapshot, deviceLock, visitorLock, ipStat] = await Promise.all([
       transaction.get(campaignRef),
       transaction.get(deviceLockRef),
+      transaction.get(visitorLockRef),
       transaction.get(ipStatRef)
     ]);
     if (!campaignSnapshot.exists) throw new ApiError(409, "failed-precondition", "This promotion is not available yet.");
     if (!campaignIsOpen(campaignSnapshot.data(), now.toMillis())) {
       throw new ApiError(409, "failed-precondition", "This promotion is currently closed.");
     }
-    if (deviceLock.exists) {
+    if (deviceLock.exists || visitorLock.exists) {
       throw new ApiError(409, "already-exists", "A free code has already been claimed from this browser.");
     }
     if ((ipStat.data()?.claimCount || 0) >= MAX_CLAIMS_PER_IP) {
@@ -190,6 +268,7 @@ async function claimPromo(data, req) {
     transaction.update(codeSnapshot.ref, { status: "claimed", claimId: claimRef.id, claimedAt: now, updatedAt: now });
     transaction.create(claimRef, { campaignId, codeId: codeSnapshot.id, claimantName, deviceHash, ipHash, claimedAt: now });
     transaction.create(deviceLockRef, { ...lockData, type: "device" });
+    transaction.create(visitorLockRef, { ...lockData, type: "signed-cookie" });
     transaction.set(ipStatRef, { campaignId, claimCount: FieldValue.increment(1), updatedAt: now }, { merge: true });
     transaction.update(campaignRef, {
       availableCount: FieldValue.increment(-1),
@@ -270,6 +349,33 @@ async function adminListCodes(data) {
   })) };
 }
 
+async function adminGetAbuseSummary(data) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  const cutoff = Date.now() - (24 * 60 * 60 * 1000);
+  const snapshot = await db().collection("promoBlockedAttempts")
+    .orderBy("blockedAt", "desc")
+    .limit(100)
+    .get();
+  const recent = snapshot.docs.filter((doc) => {
+    const attempt = doc.data();
+    return attempt.campaignId === campaignId && (attempt.blockedAt?.toMillis?.() || 0) >= cutoff;
+  });
+  const reasons = recent.reduce((counts, doc) => {
+    const reason = doc.data().reason || "rejected";
+    counts[reason] = (counts[reason] || 0) + 1;
+    return counts;
+  }, {});
+  return {
+    blockedLast24Hours: recent.length,
+    reasons,
+    protections: {
+      claimsPerBrowser: 1,
+      maxClaimsPerIp: MAX_CLAIMS_PER_IP,
+      maxAttemptsPerTenMinutes: MAX_CLAIM_ATTEMPTS_PER_WINDOW
+    }
+  };
+}
+
 async function adminDeleteAvailableCodes(data, adminEmail) {
   const campaignId = normalizeCampaignId(data.campaignId);
   const ids = Array.isArray(data.codeIds) ? [...new Set(data.codeIds)] : [];
@@ -296,17 +402,26 @@ module.exports = async function handler(req, res) {
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   if (req.method !== "POST") return res.status(405).json({ error: { code: "method-not-allowed", message: "Use POST." } });
 
+  let requestAction = null;
+  let requestData = {};
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const action = requiredString(body.action, "Action", 60);
     const data = body.data || {};
+    requestAction = action;
+    requestData = data;
     const adminEmail = ADMIN_ACTIONS.has(action) ? await requireAdmin(req) : null;
     let result;
     if (action === "getPromoStatus") result = await getPromoStatus(data);
-    else if (action === "claimPromo") result = await claimPromo(data, req);
+    else if (action === "claimPromo") {
+      const visitorId = verifiedVisitorId(req) || randomBytes(32).toString("hex");
+      result = await claimPromo(data, req, visitorId);
+      res.setHeader("Set-Cookie", visitorCookie(visitorId));
+    }
     else if (action === "adminSaveCampaign") result = await adminSaveCampaign(data, adminEmail);
     else if (action === "adminImportCodes") result = await adminImportCodes(data, adminEmail);
     else if (action === "adminListCodes") result = await adminListCodes(data);
+    else if (action === "adminGetAbuseSummary") result = await adminGetAbuseSummary(data);
     else if (action === "adminDeleteAvailableCodes") result = await adminDeleteAvailableCodes(data, adminEmail);
     else throw new ApiError(404, "not-found", "Unknown promo action.");
     return res.status(200).json({ data: result });
@@ -314,6 +429,9 @@ module.exports = async function handler(req, res) {
     const status = error instanceof ApiError ? error.status : 500;
     const code = error instanceof ApiError ? error.code : "internal";
     const message = error instanceof ApiError ? error.message : "The promo service could not complete this request.";
+    if (error instanceof ApiError && requestAction === "claimPromo") {
+      await recordBlockedClaim(requestData, req, error);
+    }
     if (status === 500) console.error("Promo API error", error);
     return res.status(status).json({ error: { code, message } });
   }

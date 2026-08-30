@@ -40,6 +40,7 @@ function readableError(error) {
   const message = String(error?.message || "").replace(/^Firebase:\s*/i, "").replace(/\s*\(functions\/[\w-]+\)\.?$/i, "");
   if (message.includes("already been claimed")) return "A code has already been claimed from this browser.";
   if (message.includes("network")) return "This network has reached its claim limit.";
+  if (message.includes("Too many claim attempts")) return "Too many attempts. Please wait 10 minutes and try again.";
   if (message.includes("All codes")) return "All codes have been claimed.";
   if (message.includes("closed")) return "This promotion is currently closed.";
   return message || "Something went wrong. Please try again.";

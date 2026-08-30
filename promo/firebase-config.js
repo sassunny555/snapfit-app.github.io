@@ -49,6 +49,7 @@ export const promoApi = {
   saveCampaign: (data) => callPromoApi("adminSaveCampaign", data, true),
   importCodes: (data) => callPromoApi("adminImportCodes", data, true),
   listCodes: (data) => callPromoApi("adminListCodes", data, true),
+  getAbuseSummary: (data) => callPromoApi("adminGetAbuseSummary", data, true),
   deleteCodes: (data) => callPromoApi("adminDeleteAvailableCodes", data, true)
 };
 
