@@ -553,19 +553,6 @@ a { color: inherit; }
   box-shadow: 0 8px 28px rgba(15, 35, 70, 0.06);
 }
 
-.promo-navbar .nav-promo {
-  border-color: rgba(0, 102, 238, 0.2);
-  color: var(--primary);
-  background: #eef6ff;
-}
-
-.promo-navbar .nav-promo:hover,
-.promo-navbar .nav-promo.active {
-  border-color: rgba(0, 102, 238, 0.28);
-  color: #ffffff;
-  background: var(--primary);
-}
-
 .simple-promo-main {
   display: grid;
   width: min(100% - 32px, 560px);
@@ -686,7 +673,7 @@ a { color: inherit; }
 @media (max-width: 560px) {
   .simple-promo-main {
     width: min(100% - 24px, 560px);
-    padding: 104px 0 42px;
+    padding: 150px 0 42px;
   }
 
   .simple-promo-card {

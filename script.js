@@ -7,6 +7,37 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavState();
     window.addEventListener('scroll', updateNavState, { passive: true });
 
+    // Highlight the homepage navigation item while its section is selected.
+    const featuresLink = document.querySelector('[data-nav-section="features"]');
+    const featuresSection = document.getElementById('features');
+
+    const setFeaturesLinkActive = (isActive) => {
+        if (!featuresLink) return;
+        featuresLink.classList.toggle('active', isActive);
+        if (isActive) {
+            featuresLink.setAttribute('aria-current', 'location');
+        } else {
+            featuresLink.removeAttribute('aria-current');
+        }
+    };
+
+    if (featuresLink && featuresSection) {
+        featuresLink.addEventListener('click', () => setFeaturesLinkActive(true));
+
+        if ('IntersectionObserver' in window) {
+            const navObserver = new IntersectionObserver(([entry]) => {
+                setFeaturesLinkActive(entry.isIntersecting);
+            }, {
+                rootMargin: '-28% 0px -48% 0px',
+                threshold: 0
+            });
+
+            navObserver.observe(featuresSection);
+        } else {
+            setFeaturesLinkActive(window.location.hash === '#features');
+        }
+    }
+
     // Duplicate screenshots carousel
     const track = document.querySelector('.carousel-track');
     if (track) {

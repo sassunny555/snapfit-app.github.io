@@ -22,7 +22,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260810-logo-fix">
+    <link rel="stylesheet" href="style.css?v=20260830-nav">
     <style>
         .legal-page {
             min-height: 100vh;
@@ -73,6 +73,9 @@
             text-decoration: underline;
         }
         @media (max-width: 768px) {
+            .legal-page {
+                padding-top: 150px;
+            }
             .legal-content {
                 padding: 28px 20px;
             }
@@ -88,7 +91,13 @@
             <img src="Resources/logo.png" alt="SnapFit" width="650" height="720" decoding="async" style="width: auto; object-fit: contain;">
             <span>SnapFit</span>
         </a>
-        <a href="index.html" class="nav-cta">Back to Home</a>
+        <div class="nav-links">
+            <a href="index.html#features" class="nav-link">Why SnapFit</a>
+            <a href="https://sites.google.com/view/snapfit-ai-privacy-policy" class="nav-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
+            <a href="terms.html" class="nav-link active" aria-current="page">Terms &amp; Conditions</a>
+            <a href="mailto:itsneodesign@gmail.com" class="nav-link">Contact</a>
+            <a href="promo/" class="nav-link">Promo Code</a>
+        </div>
     </nav>
 
     <main class="legal-page">
