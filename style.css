@@ -108,6 +108,9 @@ body {
     display: flex;
     align-items: center;
     gap: 6px;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .nav-link {
@@ -1621,6 +1624,8 @@ body.nav-scrolled .hero .nav-promo:hover {
 
     .nav-links {
         display: flex;
+        position: static;
+        transform: none;
         order: 3;
         width: calc(100% + 32px);
         margin: 9px -16px 0;
