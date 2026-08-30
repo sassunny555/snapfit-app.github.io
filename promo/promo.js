@@ -12,8 +12,6 @@ const elements = {
   name: document.getElementById("claimName"),
   button: document.getElementById("claimButton"),
   message: document.getElementById("formMessage"),
-  inventory: document.getElementById("inventoryText"),
-  remaining: document.getElementById("remainingCount"),
   code: document.getElementById("claimedCode"),
   copy: document.getElementById("copyButton")
 };
@@ -52,8 +50,6 @@ async function loadStatus() {
   showState(elements.loading);
   const preview = location.hostname === "localhost" ? new URLSearchParams(location.search).get("preview") : null;
   if (preview === "claim") {
-    elements.remaining.textContent = "42";
-    elements.inventory.textContent = "codes remaining";
     showState(elements.claim);
     return;
   }
@@ -74,8 +70,6 @@ async function loadStatus() {
     } else if (data.availableCount < 1) {
       showState(elements.empty);
     } else {
-      elements.remaining.textContent = data.availableCount.toLocaleString();
-      elements.inventory.textContent = data.availableCount === 1 ? "code remaining" : "codes remaining";
       showState(elements.claim);
     }
   } catch {
