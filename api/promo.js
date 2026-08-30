@@ -1,6 +1,5 @@
 const { createHash, createHmac } = require("node:crypto");
 const { cert, getApps, initializeApp } = require("firebase-admin/app");
-const { getAuth } = require("firebase-admin/auth");
 const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
 
 const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "snapfit-web-820e0";
@@ -115,6 +114,7 @@ async function requireAdmin(req) {
 
   let decoded;
   try {
+    const { getAuth } = await import("firebase-admin/auth");
     decoded = await getAuth(adminApp()).verifyIdToken(authorization.slice(7), true);
   } catch {
     throw new ApiError(401, "unauthenticated", "Your admin session is invalid or expired.");
