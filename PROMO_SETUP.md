@@ -4,31 +4,31 @@ The public page is available at `/promo/` and the protected inventory console is
 
 ## Architecture
 
-- The existing site remains plain HTML, CSS, and JavaScript on GitHub Pages.
-- Firebase callable Cloud Functions perform every inventory operation.
+- The existing site remains plain HTML, CSS, and JavaScript, hosted on Vercel.
+- A same-origin Vercel Function at `/api/promo` performs every inventory operation.
 - Firestore stores campaigns, available/claimed codes, claim timestamps, and hashed abuse-prevention records.
-- Firestore security rules deny every direct browser read and write. Cloud Functions use the Admin SDK.
+- Firestore security rules deny every direct browser read and write. The Vercel Function uses the Admin SDK.
 - Claim assignment runs in a Firestore transaction, so two visitors cannot receive the same code.
 - One claim is allowed per normalized email and browser identifier. A network can claim up to three codes.
 - Emails, browser identifiers, and IP addresses are HMAC-hashed before storage; raw values are not retained.
 
-## One-time Firebase setup
+## One-time Firebase and Vercel setup
 
-1. Use the Firebase Blaze plan. Cloud Functions deployment and outbound production execution require billing.
-2. In Firebase Authentication, enable the **Google** sign-in provider for the admin console.
-3. Add `snapfit-app.online` to Authentication → Settings → Authorized domains.
-4. Ensure a Firestore database exists in production mode. `asia-southeast1` is the preferred region for this deployment.
-5. Copy `functions/.env.example` to `functions/.env.snapfit-web-820e0` and set `ADMIN_EMAILS` to a comma-separated admin allowlist. The project currently has a local deployment file configured for `itsneodesign@gmail.com`; environment files are intentionally excluded from Git.
-6. Set the server hashing secret if it has not already been set:
+1. In Firebase Authentication, enable the **Google** sign-in provider for the admin console.
+2. Add `snapfit-app.online` and `www.snapfit-app.online` to Authentication → Settings → Authorized domains.
+3. Ensure a Firestore database exists in production mode.
+4. In Firebase Project settings → Service accounts, generate a private key for the Admin SDK. Do not commit or paste this JSON into frontend code.
+5. In Vercel Project settings → Environment Variables, add these values to Production, Preview, and Development:
+
+   - `FIREBASE_SERVICE_ACCOUNT_JSON`: the complete service-account JSON object
+   - `CLAIM_HASH_SECRET`: a random value containing at least 32 characters
+   - `ADMIN_EMAILS`: comma-separated verified Google accounts allowed to administer promotions
+
+6. Redeploy the Vercel project after saving environment variables.
+7. Deploy the Firestore indexes and deny-all client rules once:
 
    ```sh
-   openssl rand -base64 48 | firebase functions:secrets:set CLAIM_HASH_SECRET --data-file=- --project snapfit-web-820e0
-   ```
-
-7. Deploy only the backend (the website can continue deploying through GitHub Pages):
-
-   ```sh
-   firebase deploy --only functions,firestore --project snapfit-web-820e0
+   firebase deploy --only firestore --project snapfit-web-820e0
    ```
 
 ## Launching a promotion
@@ -47,7 +47,6 @@ Change `PROMO_CAMPAIGN_ID` in `promo/firebase-config.js` to a new lowercase ID s
 
 ## Recommended hardening after launch
 
-- Enable Firebase App Check for the web app, then set `enforceAppCheck: true` on callable functions after verifying valid traffic.
-- Configure Firebase budget alerts and Cloud Functions usage alerts.
-- Review Cloud Functions logs for unusual claim volume.
+- Configure Firebase and Vercel usage alerts.
+- Review Vercel Function logs for unusual claim volume.
 - Keep the admin allowlist minimal and remove access immediately when no longer needed.

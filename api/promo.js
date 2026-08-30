@@ -1,0 +1,324 @@
+const { createHash, createHmac } = require("node:crypto");
+const { cert, getApps, initializeApp } = require("firebase-admin/app");
+const { getAuth } = require("firebase-admin/auth");
+const { FieldValue, Timestamp, getFirestore } = require("firebase-admin/firestore");
+
+const PROJECT_ID = process.env.FIREBASE_PROJECT_ID || "snapfit-web-820e0";
+const MAX_CODES_PER_IMPORT = 400;
+const MAX_CLAIMS_PER_IP = 3;
+const CAMPAIGN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{2,63}$/;
+const CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{2,79}$/;
+const ADMIN_ACTIONS = new Set([
+  "adminSaveCampaign",
+  "adminImportCodes",
+  "adminListCodes",
+  "adminDeleteAvailableCodes"
+]);
+
+function firebaseCredential() {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_JSON) {
+    const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT_JSON);
+    if (serviceAccount.private_key) serviceAccount.private_key = serviceAccount.private_key.replace(/\\n/g, "\n");
+    return cert(serviceAccount);
+  }
+
+  if (process.env.FIREBASE_CLIENT_EMAIL && process.env.FIREBASE_PRIVATE_KEY) {
+    return cert({
+      projectId: PROJECT_ID,
+      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
+      privateKey: process.env.FIREBASE_PRIVATE_KEY.replace(/\\n/g, "\n")
+    });
+  }
+
+  throw new Error("Firebase Admin credentials are not configured.");
+}
+
+function adminApp() {
+  return getApps()[0] || initializeApp({ credential: firebaseCredential(), projectId: PROJECT_ID });
+}
+
+function db() {
+  return getFirestore(adminApp());
+}
+
+class ApiError extends Error {
+  constructor(status, code, message) {
+    super(message);
+    this.status = status;
+    this.code = code;
+  }
+}
+
+function requiredString(value, label, maxLength = 120) {
+  if (typeof value !== "string") throw new ApiError(400, "invalid-argument", `${label} is required.`);
+  const normalized = value.trim();
+  if (!normalized || normalized.length > maxLength) throw new ApiError(400, "invalid-argument", `${label} is invalid.`);
+  return normalized;
+}
+
+function normalizeCampaignId(value) {
+  const campaignId = requiredString(value, "Campaign", 64).toLowerCase();
+  if (!CAMPAIGN_ID_PATTERN.test(campaignId)) {
+    throw new ApiError(400, "invalid-argument", "Campaign ID must use lowercase letters, numbers, and hyphens.");
+  }
+  return campaignId;
+}
+
+function normalizeEmail(value) {
+  const email = requiredString(value, "Email", 254).toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    throw new ApiError(400, "invalid-argument", "Enter a valid email address.");
+  }
+  return email;
+}
+
+function normalizeDeviceId(value) {
+  const deviceId = requiredString(value, "Browser identifier", 100);
+  if (!/^[a-zA-Z0-9-]{16,100}$/.test(deviceId)) {
+    throw new ApiError(400, "invalid-argument", "Browser identifier is invalid.");
+  }
+  return deviceId;
+}
+
+function clientIp(req) {
+  const forwarded = req.headers["x-forwarded-for"];
+  const candidate = Array.isArray(forwarded) ? forwarded[0] : forwarded?.split(",")[0];
+  return String(req.headers["x-real-ip"] || candidate || req.socket?.remoteAddress || "unknown").trim().slice(0, 100);
+}
+
+function privateHash(type, value) {
+  const secret = process.env.CLAIM_HASH_SECRET;
+  if (!secret || secret.length < 32) throw new Error("CLAIM_HASH_SECRET must contain at least 32 characters.");
+  return createHmac("sha256", secret).update(`${type}:${value}`).digest("hex");
+}
+
+function stableCodeId(campaignId, code) {
+  return createHash("sha256").update(`${campaignId}:${code}`).digest("hex");
+}
+
+function campaignIsOpen(campaign, now) {
+  if (!campaign?.active) return false;
+  const startsAt = campaign.startsAt?.toMillis?.();
+  const endsAt = campaign.endsAt?.toMillis?.();
+  return (!startsAt || startsAt <= now) && (!endsAt || endsAt >= now);
+}
+
+function serializeTime(value) {
+  return value?.toDate?.().toISOString() || null;
+}
+
+async function requireAdmin(req) {
+  const authorization = req.headers.authorization || "";
+  if (!authorization.startsWith("Bearer ")) {
+    throw new ApiError(401, "unauthenticated", "Sign in with an authorized Google account.");
+  }
+
+  let decoded;
+  try {
+    decoded = await getAuth(adminApp()).verifyIdToken(authorization.slice(7), true);
+  } catch {
+    throw new ApiError(401, "unauthenticated", "Your admin session is invalid or expired.");
+  }
+
+  const email = decoded.email?.toLowerCase();
+  const allowed = (process.env.ADMIN_EMAILS || "")
+    .split(",")
+    .map((item) => item.trim().toLowerCase())
+    .filter(Boolean);
+  if (!email || decoded.email_verified !== true || !allowed.includes(email)) {
+    throw new ApiError(403, "permission-denied", "This account is not authorized for promo administration.");
+  }
+  return email;
+}
+
+async function getPromoStatus(data) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  const snapshot = await db().collection("promoCampaigns").doc(campaignId).get();
+  if (!snapshot.exists) return { exists: false, active: false, availableCount: 0, claimedCount: 0 };
+  const campaign = snapshot.data();
+  return {
+    exists: true,
+    name: campaign.name || "SnapFit Premium",
+    active: campaignIsOpen(campaign, Date.now()),
+    availableCount: Math.max(0, Number(campaign.availableCount) || 0),
+    claimedCount: Math.max(0, Number(campaign.claimedCount) || 0),
+    endsAt: serializeTime(campaign.endsAt)
+  };
+}
+
+async function claimPromo(data, req) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  const email = normalizeEmail(data.email);
+  const deviceId = normalizeDeviceId(data.deviceId);
+  const emailHash = privateHash("email", email);
+  const deviceHash = privateHash("device", deviceId);
+  const ipHash = privateHash("ip", clientIp(req));
+  const firestore = db();
+  const campaignRef = firestore.collection("promoCampaigns").doc(campaignId);
+  const emailLockRef = firestore.collection("promoClaimLocks").doc(`${campaignId}_email_${emailHash}`);
+  const deviceLockRef = firestore.collection("promoClaimLocks").doc(`${campaignId}_device_${deviceHash}`);
+  const ipStatRef = firestore.collection("promoIpStats").doc(`${campaignId}_${ipHash}`);
+  const claimRef = firestore.collection("promoClaims").doc();
+  const now = Timestamp.now();
+
+  return firestore.runTransaction(async (transaction) => {
+    const [campaignSnapshot, emailLock, deviceLock, ipStat] = await Promise.all([
+      transaction.get(campaignRef),
+      transaction.get(emailLockRef),
+      transaction.get(deviceLockRef),
+      transaction.get(ipStatRef)
+    ]);
+    if (!campaignSnapshot.exists) throw new ApiError(409, "failed-precondition", "This promotion is not available yet.");
+    if (!campaignIsOpen(campaignSnapshot.data(), now.toMillis())) {
+      throw new ApiError(409, "failed-precondition", "This promotion is currently closed.");
+    }
+    if (emailLock.exists || deviceLock.exists) {
+      throw new ApiError(409, "already-exists", "A free code has already been claimed with this email or browser.");
+    }
+    if ((ipStat.data()?.claimCount || 0) >= MAX_CLAIMS_PER_IP) {
+      throw new ApiError(429, "resource-exhausted", "The claim limit for this network has been reached.");
+    }
+
+    const codeQuery = firestore.collection("promoCodes")
+      .where("campaignId", "==", campaignId)
+      .where("status", "==", "available")
+      .orderBy("importedAt", "asc")
+      .limit(1);
+    const codeResults = await transaction.get(codeQuery);
+    if (codeResults.empty) throw new ApiError(409, "resource-exhausted", "All codes have been claimed.");
+
+    const codeSnapshot = codeResults.docs[0];
+    const code = codeSnapshot.data().code;
+    const lockData = { campaignId, claimId: claimRef.id, createdAt: now };
+    transaction.update(codeSnapshot.ref, { status: "claimed", claimId: claimRef.id, claimedAt: now, updatedAt: now });
+    transaction.create(claimRef, { campaignId, codeId: codeSnapshot.id, emailHash, deviceHash, ipHash, claimedAt: now });
+    transaction.create(emailLockRef, { ...lockData, type: "email" });
+    transaction.create(deviceLockRef, { ...lockData, type: "device" });
+    transaction.set(ipStatRef, { campaignId, claimCount: FieldValue.increment(1), updatedAt: now }, { merge: true });
+    transaction.update(campaignRef, {
+      availableCount: FieldValue.increment(-1),
+      claimedCount: FieldValue.increment(1),
+      updatedAt: now
+    });
+    return { code, claimId: claimRef.id, claimedAt: now.toDate().toISOString() };
+  });
+}
+
+async function adminSaveCampaign(data, adminEmail) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  const name = requiredString(data.name, "Campaign name", 100);
+  const active = data.active === true;
+  const campaignRef = db().collection("promoCampaigns").doc(campaignId);
+  const existing = await campaignRef.get();
+  const now = Timestamp.now();
+  await campaignRef.set({
+    name,
+    active,
+    availableCount: existing.data()?.availableCount || 0,
+    claimedCount: existing.data()?.claimedCount || 0,
+    createdAt: existing.data()?.createdAt || now,
+    updatedAt: now,
+    updatedBy: adminEmail
+  }, { merge: true });
+  return { ok: true, campaignId };
+}
+
+async function adminImportCodes(data, adminEmail) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  if (!Array.isArray(data.codes)) throw new ApiError(400, "invalid-argument", "Codes must be provided as a list.");
+  const codes = [...new Set(data.codes.map((value) => String(value).trim().toUpperCase()).filter(Boolean))];
+  if (!codes.length || codes.length > MAX_CODES_PER_IMPORT) {
+    throw new ApiError(400, "invalid-argument", `Import between 1 and ${MAX_CODES_PER_IMPORT} codes at a time.`);
+  }
+  if (codes.some((code) => !CODE_PATTERN.test(code))) {
+    throw new ApiError(400, "invalid-argument", "Codes may contain uppercase letters, numbers, hyphens, and underscores only.");
+  }
+
+  const firestore = db();
+  const campaignRef = firestore.collection("promoCampaigns").doc(campaignId);
+  if (!(await campaignRef.get()).exists) throw new ApiError(409, "failed-precondition", "Create the campaign before importing codes.");
+  const references = codes.map((code) => firestore.collection("promoCodes").doc(stableCodeId(campaignId, code)));
+  const existing = await firestore.getAll(...references);
+  const newItems = existing.map((snapshot, index) => ({ snapshot, code: codes[index] })).filter(({ snapshot }) => !snapshot.exists);
+  const now = Timestamp.now();
+  const batch = firestore.batch();
+  newItems.forEach(({ snapshot, code }) => batch.create(snapshot.ref, {
+    campaignId, code, status: "available", importedAt: now, updatedAt: now, importedBy: adminEmail
+  }));
+  if (newItems.length) {
+    batch.update(campaignRef, {
+      availableCount: FieldValue.increment(newItems.length), updatedAt: now, updatedBy: adminEmail
+    });
+    await batch.commit();
+  }
+  return { imported: newItems.length, duplicates: codes.length - newItems.length };
+}
+
+async function adminListCodes(data) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  const status = data.status === "claimed" ? "claimed" : "available";
+  const orderField = status === "claimed" ? "claimedAt" : "importedAt";
+  const direction = status === "claimed" ? "desc" : "asc";
+  const snapshot = await db().collection("promoCodes")
+    .where("campaignId", "==", campaignId)
+    .where("status", "==", status)
+    .orderBy(orderField, direction)
+    .limit(100)
+    .get();
+  return { codes: snapshot.docs.map((doc) => ({
+    id: doc.id,
+    code: doc.data().code,
+    status: doc.data().status,
+    importedAt: serializeTime(doc.data().importedAt),
+    claimedAt: serializeTime(doc.data().claimedAt)
+  })) };
+}
+
+async function adminDeleteAvailableCodes(data, adminEmail) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  const ids = Array.isArray(data.codeIds) ? [...new Set(data.codeIds)] : [];
+  if (!ids.length || ids.length > 100 || ids.some((id) => !/^[a-f0-9]{64}$/.test(String(id)))) {
+    throw new ApiError(400, "invalid-argument", "Select between 1 and 100 valid available codes.");
+  }
+  const firestore = db();
+  const refs = ids.map((id) => firestore.collection("promoCodes").doc(id));
+  const campaignRef = firestore.collection("promoCampaigns").doc(campaignId);
+  const deleted = await firestore.runTransaction(async (transaction) => {
+    const snapshots = await Promise.all(refs.map((ref) => transaction.get(ref)));
+    const deletable = snapshots.filter((snapshot) => snapshot.exists && snapshot.data().campaignId === campaignId && snapshot.data().status === "available");
+    deletable.forEach((snapshot) => transaction.delete(snapshot.ref));
+    if (deletable.length) transaction.update(campaignRef, {
+      availableCount: FieldValue.increment(-deletable.length), updatedAt: Timestamp.now(), updatedBy: adminEmail
+    });
+    return deletable.length;
+  });
+  return { deleted };
+}
+
+module.exports = async function handler(req, res) {
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  if (req.method !== "POST") return res.status(405).json({ error: { code: "method-not-allowed", message: "Use POST." } });
+
+  try {
+    const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
+    const action = requiredString(body.action, "Action", 60);
+    const data = body.data || {};
+    const adminEmail = ADMIN_ACTIONS.has(action) ? await requireAdmin(req) : null;
+    let result;
+    if (action === "getPromoStatus") result = await getPromoStatus(data);
+    else if (action === "claimPromo") result = await claimPromo(data, req);
+    else if (action === "adminSaveCampaign") result = await adminSaveCampaign(data, adminEmail);
+    else if (action === "adminImportCodes") result = await adminImportCodes(data, adminEmail);
+    else if (action === "adminListCodes") result = await adminListCodes(data);
+    else if (action === "adminDeleteAvailableCodes") result = await adminDeleteAvailableCodes(data, adminEmail);
+    else throw new ApiError(404, "not-found", "Unknown promo action.");
+    return res.status(200).json({ data: result });
+  } catch (error) {
+    const status = error instanceof ApiError ? error.status : 500;
+    const code = error instanceof ApiError ? error.code : "internal";
+    const message = error instanceof ApiError ? error.message : "The promo service could not complete this request.";
+    if (status === 500) console.error("Promo API error", error);
+    return res.status(status).json({ error: { code, message } });
+  }
+};

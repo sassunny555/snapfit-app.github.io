@@ -6,11 +6,6 @@ import {
   signInWithPopup,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
-import {
-  connectFunctionsEmulator,
-  getFunctions,
-  httpsCallable
-} from "https://www.gstatic.com/firebasejs/12.18.0/firebase-functions.js";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDg3IhSmbgvEKGhVCpWi3t3c7ak-TDuxYc",
@@ -24,20 +19,37 @@ const firebaseConfig = {
 export const PROMO_CAMPAIGN_ID = "premium-launch-2026";
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const functions = getFunctions(app, "asia-southeast1");
 export const googleProvider = new GoogleAuthProvider();
 
-if (location.hostname === "localhost" && new URLSearchParams(location.search).has("emulator")) {
-  connectFunctionsEmulator(functions, "127.0.0.1", 5001);
+async function callPromoApi(action, data, requiresAdmin = false) {
+  const headers = { "Content-Type": "application/json" };
+  if (requiresAdmin) {
+    const user = auth.currentUser;
+    if (!user) throw new Error("Sign in with an authorized Google account.");
+    headers.Authorization = `Bearer ${await user.getIdToken()}`;
+  }
+
+  const response = await fetch("/api/promo", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ action, data })
+  });
+  const payload = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    const error = new Error(payload.error?.message || "The promo service is unavailable.");
+    error.code = payload.error?.code;
+    throw error;
+  }
+  return payload;
 }
 
 export const promoApi = {
-  status: httpsCallable(functions, "getPromoStatus"),
-  claim: httpsCallable(functions, "claimPromo"),
-  saveCampaign: httpsCallable(functions, "adminSaveCampaign"),
-  importCodes: httpsCallable(functions, "adminImportCodes"),
-  listCodes: httpsCallable(functions, "adminListCodes"),
-  deleteCodes: httpsCallable(functions, "adminDeleteAvailableCodes")
+  status: (data) => callPromoApi("getPromoStatus", data),
+  claim: (data) => callPromoApi("claimPromo", data),
+  saveCampaign: (data) => callPromoApi("adminSaveCampaign", data, true),
+  importCodes: (data) => callPromoApi("adminImportCodes", data, true),
+  listCodes: (data) => callPromoApi("adminListCodes", data, true),
+  deleteCodes: (data) => callPromoApi("adminDeleteAvailableCodes", data, true)
 };
 
 export { onAuthStateChanged, signInWithPopup, signOut };
