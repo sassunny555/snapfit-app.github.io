@@ -541,22 +541,36 @@ a { color: inherit; }
 .simple-promo-body {
   display: grid;
   min-height: 100vh;
-  grid-template-rows: auto 1fr auto;
+  grid-template-rows: 1fr auto;
   background:
     radial-gradient(circle at 50% 12%, rgba(0, 102, 238, 0.11), transparent 30rem),
     #f7faff;
 }
 
-.simple-promo-header {
-  min-height: 76px;
+.promo-navbar {
+  background: #ffffff;
   border-bottom: 1px solid rgba(0, 102, 238, 0.08);
+  box-shadow: 0 8px 28px rgba(15, 35, 70, 0.06);
+}
+
+.promo-navbar .nav-promo {
+  border-color: rgba(0, 102, 238, 0.2);
+  color: var(--primary);
+  background: #eef6ff;
+}
+
+.promo-navbar .nav-promo:hover,
+.promo-navbar .nav-promo.active {
+  border-color: rgba(0, 102, 238, 0.28);
+  color: #ffffff;
+  background: var(--primary);
 }
 
 .simple-promo-main {
   display: grid;
   width: min(100% - 32px, 560px);
   margin: 0 auto;
-  padding: 56px 0 64px;
+  padding: 132px 0 64px;
   place-items: center;
 }
 
@@ -672,7 +686,7 @@ a { color: inherit; }
 @media (max-width: 560px) {
   .simple-promo-main {
     width: min(100% - 24px, 560px);
-    padding: 28px 0 42px;
+    padding: 104px 0 42px;
   }
 
   .simple-promo-card {

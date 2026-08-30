@@ -11,16 +11,27 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../style.css?v=20260830-promo-nav">
   <link rel="stylesheet" href="promo.css">
 </head>
 <body class="simple-promo-body">
-  <header class="promo-header simple-promo-header">
-    <a class="brand" href="../index.html" aria-label="SnapFit home">
-      <img src="../Resources/Logo.png" alt="" width="650" height="720">
+  <nav class="navbar promo-navbar" aria-label="Main navigation">
+    <a class="logo" href="../index.html" aria-label="SnapFit home">
+      <img src="/Resources/Logo.png" alt="SnapFit" width="650" height="720" decoding="async" style="width: auto; object-fit: contain;">
       <span>SnapFit</span>
     </a>
-    <a class="back-link" href="../index.html">Back to website</a>
-  </header>
+    <div class="nav-links">
+      <a href="../index.html#screenshots" class="nav-link">See It In Action</a>
+      <a href="../index.html#features" class="nav-link">Why SnapFit?</a>
+      <a href="../index.html#features" class="nav-link">Features</a>
+      <a href="../index.html#testimonials" class="nav-link">Testimonials</a>
+      <a href="https://sites.google.com/view/snapfit-ai-privacy-policy" class="nav-link" target="_blank" rel="noopener noreferrer">Privacy</a>
+      <a href="../terms.html" class="nav-link">Terms</a>
+      <a href="mailto:itsneodesign@gmail.com" class="nav-link">Contact</a>
+    </div>
+    <a href="./" class="nav-promo active" aria-current="page">Promo</a>
+    <a href="https://play.google.com/store/apps/details?id=com.snapfit.calorietracker" class="nav-cta" target="_blank" rel="noopener noreferrer">Download App</a>
+  </nav>
 
   <main class="simple-promo-main">
     <section class="simple-promo-card" aria-labelledby="promo-title">
@@ -76,7 +87,6 @@
         <span class="eyebrow">Promotion update</span>
         <h2>All codes claimed</h2>
         <p>This promo has reached its limit. Watch SnapFit for the next drop.</p>
-        <a class="secondary-button" href="../index.html">Back to SnapFit</a>
       </div>
 
       <div id="closedState" class="result-state" hidden aria-live="polite">
@@ -84,15 +94,12 @@
         <span class="eyebrow">Promotion unavailable</span>
         <h2>This promo is closed</h2>
         <p>Please check back soon for the next SnapFit Premium drop.</p>
-        <a class="secondary-button" href="../index.html">Back to SnapFit</a>
       </div>
     </section>
   </main>
 
   <footer class="promo-footer simple-promo-footer">
     <span>© 2026 SnapFit</span>
-    <span class="footer-dot" aria-hidden="true">•</span>
-    <a href="admin.html">Admin</a>
   </footer>
 
   <script type="module" src="promo.js"></script>
