@@ -620,6 +620,15 @@ a { color: inherit; }
   fill: currentColor;
 }
 
+.simple-premium-logo {
+  display: block;
+  width: 94px;
+  height: auto;
+  margin: 0 auto 18px;
+  object-fit: contain;
+  filter: drop-shadow(0 12px 20px rgba(0, 102, 238, 0.18));
+}
+
 .simple-promo-card h1,
 .simple-promo-card h2 {
   margin: 12px auto 10px;
