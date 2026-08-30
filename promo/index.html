@@ -6,18 +6,15 @@
   <meta name="description" content="Claim a limited free SnapFit Premium promotional code.">
   <meta name="robots" content="noindex, nofollow">
   <meta name="theme-color" content="#0066ee">
-  <title>Claim SnapFit Premium</title>
+  <title>SnapFit Premium Promo</title>
   <link rel="icon" type="image/png" href="../Resources/Logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="promo.css">
 </head>
-<body>
-  <div class="page-glow page-glow-one" aria-hidden="true"></div>
-  <div class="page-glow page-glow-two" aria-hidden="true"></div>
-
-  <header class="promo-header">
+<body class="simple-promo-body">
+  <header class="promo-header simple-promo-header">
     <a class="brand" href="../index.html" aria-label="SnapFit home">
       <img src="../Resources/Logo.png" alt="" width="650" height="720">
       <span>SnapFit</span>
@@ -25,104 +22,77 @@
     <a class="back-link" href="../index.html">Back to website</a>
   </header>
 
-  <main class="promo-main">
-    <section class="promo-copy" aria-labelledby="promo-title">
-      <div class="premium-pill">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 16.82l-5.8 3.04 1.11-6.46-4.7-4.58 6.49-.94L12 2Z"/></svg>
-        Limited Premium Drop
-      </div>
-      <h1 id="promo-title">Your healthier routine, <span>now Premium.</span></h1>
-      <p class="promo-lead">Claim one free SnapFit Premium code while supplies last. Every code is unique and assigned instantly.</p>
-
-      <div class="benefit-list" aria-label="Premium benefits">
-        <div class="benefit-item">
-          <span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-          <span><strong>Advanced AI insights</strong> for easier daily tracking</span>
-        </div>
-        <div class="benefit-item">
-          <span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-          <span><strong>One code per person</strong> with secure assignment</span>
-        </div>
-        <div class="benefit-item">
-          <span class="benefit-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-          <span><strong>No payment required</strong> for this promotion</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="claim-card" aria-labelledby="claim-title">
+  <main class="simple-promo-main">
+    <section class="simple-promo-card" aria-labelledby="promo-title">
       <div id="loadingState" class="state-panel" aria-live="polite">
         <span class="spinner" aria-hidden="true"></span>
-        <p>Checking code availability…</p>
+        <p>Checking availability…</p>
       </div>
 
       <div id="claimState" hidden>
-        <div class="inventory-row">
-          <span class="live-dot" aria-hidden="true"></span>
-          <span id="inventoryText">Codes available</span>
+        <div class="simple-promo-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="m12 2 2.9 5.88 6.49.94-4.7 4.58 1.11 6.46L12 16.82l-5.8 3.04 1.11-6.46-4.7-4.58 6.49-.94L12 2Z"/></svg>
         </div>
-        <h2 id="claim-title">Claim your free code</h2>
-        <p>Enter your email and we’ll securely assign the next available Premium code.</p>
+        <span class="eyebrow">SnapFit Premium</span>
+        <h1 id="promo-title">Claim your free promo code</h1>
+        <p class="simple-promo-description">Enter your name and we’ll assign the next available Premium code.</p>
+
+        <div class="simple-inventory" aria-live="polite">
+          <span class="live-dot" aria-hidden="true"></span>
+          <strong id="remainingCount">0</strong>
+          <span id="inventoryText">codes remaining</span>
+        </div>
 
         <form id="claimForm" novalidate>
-          <div class="field-group">
-            <label for="claimEmail">Email address</label>
-            <input id="claimEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@example.com" required aria-describedby="emailHint formMessage">
-            <span id="emailHint" class="field-hint">Used only to prevent duplicate claims.</span>
+          <div class="field-group simple-field">
+            <label for="claimName">Your name</label>
+            <input id="claimName" name="name" type="text" autocomplete="name" maxlength="80" placeholder="Enter your name" required aria-describedby="nameHint formMessage">
+            <span id="nameHint" class="field-hint">One code is available per visitor.</span>
           </div>
-          <label class="consent-row">
-            <input id="claimConsent" type="checkbox" required>
-            <span>I agree to the <a href="../terms.html" target="_blank" rel="noopener noreferrer">Terms</a> and <a href="https://sites.google.com/view/snapfit-ai-privacy-policy" target="_blank" rel="noopener noreferrer">Privacy Policy</a>.</span>
-          </label>
           <button class="primary-button" id="claimButton" type="submit">
-            <span>Claim Premium code</span>
+            <span>Claim promo</span>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
           </button>
           <p id="formMessage" class="form-message" role="alert"></p>
         </form>
-        <div class="trust-note">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/><path d="m9 12 2 2 4-4"/></svg>
-          Claims are protected against duplicates and automated abuse.
-        </div>
       </div>
 
-      <div id="successState" class="result-state" hidden aria-live="polite">
-        <span class="result-icon success-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-        <span class="eyebrow">Premium unlocked</span>
-        <h2>Your code is ready</h2>
-        <p>Copy this code and redeem it inside SnapFit. Keep it somewhere safe—it is shown only once.</p>
-        <div class="code-box">
+      <div id="successState" class="result-state simple-success" hidden aria-live="polite">
+        <span class="result-icon success-icon success-pop" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
+        <span class="eyebrow">Promo claimed</span>
+        <h2>Your Premium code</h2>
+        <p>Copy the code below and redeem it in SnapFit.</p>
+        <div class="code-box code-reveal">
           <code id="claimedCode"></code>
           <button id="copyButton" type="button" aria-label="Copy Premium code">
             <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
             <span>Copy</span>
           </button>
         </div>
-        <a class="primary-button download-button" href="https://play.google.com/store/apps/details?id=com.snapfit.calorietracker" target="_blank" rel="noopener noreferrer">Open SnapFit on Google Play</a>
       </div>
 
       <div id="emptyState" class="result-state" hidden aria-live="polite">
         <span class="result-icon empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 12v10H4V12"/><path d="M2 7h20v5H2z"/><path d="M12 22V7M12 7H7.5a2.5 2.5 0 1 1 0-5C11 2 12 7 12 7Zm0 0h4.5a2.5 2.5 0 1 0 0-5C13 2 12 7 12 7Z"/></svg></span>
         <span class="eyebrow">Promotion update</span>
         <h2>All codes claimed</h2>
-        <p>This Premium drop has reached its limit. Follow SnapFit for future promotions and new releases.</p>
-        <a class="secondary-button" href="../index.html">Explore SnapFit</a>
+        <p>This promo has reached its limit. Watch SnapFit for the next drop.</p>
+        <a class="secondary-button" href="../index.html">Back to SnapFit</a>
       </div>
 
       <div id="closedState" class="result-state" hidden aria-live="polite">
         <span class="result-icon empty-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></span>
         <span class="eyebrow">Promotion unavailable</span>
-        <h2>This drop is currently closed</h2>
-        <p>Please check back later or visit SnapFit to continue your health journey.</p>
+        <h2>This promo is closed</h2>
+        <p>Please check back soon for the next SnapFit Premium drop.</p>
         <a class="secondary-button" href="../index.html">Back to SnapFit</a>
       </div>
     </section>
   </main>
 
-  <footer class="promo-footer">
+  <footer class="promo-footer simple-promo-footer">
     <span>© 2026 SnapFit</span>
     <span class="footer-dot" aria-hidden="true">•</span>
-    <a href="admin.html">Promotion admin</a>
+    <a href="admin.html">Admin</a>
   </footer>
 
   <script type="module" src="promo.js"></script>

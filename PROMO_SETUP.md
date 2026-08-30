@@ -9,8 +9,8 @@ The public page is available at `/promo/` and the protected inventory console is
 - Firestore stores campaigns, available/claimed codes, claim timestamps, and hashed abuse-prevention records.
 - Firestore security rules deny every direct browser read and write. The Vercel Function uses the Admin SDK.
 - Claim assignment runs in a Firestore transaction, so two visitors cannot receive the same code.
-- One claim is allowed per normalized email and browser identifier. A network can claim up to three codes.
-- Emails, browser identifiers, and IP addresses are HMAC-hashed before storage; raw values are not retained.
+- Public claims require only a display name. One claim is allowed per browser identifier, and a network can claim up to three codes.
+- Browser identifiers and IP addresses are HMAC-hashed before storage; raw identifiers are not retained. The submitted display name is stored with the claim for administration.
 
 ## One-time Firebase and Vercel setup
 

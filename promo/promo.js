@@ -7,11 +7,11 @@ const elements = {
   empty: document.getElementById("emptyState"),
   closed: document.getElementById("closedState"),
   form: document.getElementById("claimForm"),
-  email: document.getElementById("claimEmail"),
-  consent: document.getElementById("claimConsent"),
+  name: document.getElementById("claimName"),
   button: document.getElementById("claimButton"),
   message: document.getElementById("formMessage"),
   inventory: document.getElementById("inventoryText"),
+  remaining: document.getElementById("remainingCount"),
   code: document.getElementById("claimedCode"),
   copy: document.getElementById("copyButton")
 };
@@ -38,7 +38,7 @@ function getDeviceId() {
 
 function readableError(error) {
   const message = String(error?.message || "").replace(/^Firebase:\s*/i, "").replace(/\s*\(functions\/[\w-]+\)\.?$/i, "");
-  if (message.includes("already been claimed")) return "A code has already been claimed with this email or browser.";
+  if (message.includes("already been claimed")) return "A code has already been claimed from this browser.";
   if (message.includes("network")) return "This network has reached its claim limit.";
   if (message.includes("All codes")) return "All codes have been claimed.";
   if (message.includes("closed")) return "This promotion is currently closed.";
@@ -49,7 +49,8 @@ async function loadStatus() {
   showState(elements.loading);
   const preview = location.hostname === "localhost" ? new URLSearchParams(location.search).get("preview") : null;
   if (preview === "claim") {
-    elements.inventory.textContent = "42 codes available";
+    elements.remaining.textContent = "42";
+    elements.inventory.textContent = "codes remaining";
     showState(elements.claim);
     return;
   }
@@ -69,7 +70,8 @@ async function loadStatus() {
     } else if (data.availableCount < 1) {
       showState(elements.empty);
     } else {
-      elements.inventory.textContent = `${data.availableCount.toLocaleString()} ${data.availableCount === 1 ? "code" : "codes"} available`;
+      elements.remaining.textContent = data.availableCount.toLocaleString();
+      elements.inventory.textContent = data.availableCount === 1 ? "code remaining" : "codes remaining";
       showState(elements.claim);
     }
   } catch {
@@ -77,26 +79,22 @@ async function loadStatus() {
   }
 }
 
-function validateEmail() {
-  const valid = elements.email.validity.valid && elements.email.value.trim().length > 0;
-  elements.email.setAttribute("aria-invalid", String(!valid));
+function validateName() {
+  const name = elements.name.value.trim().replace(/\s+/g, " ");
+  const valid = name.length >= 2 && name.length <= 80;
+  elements.name.setAttribute("aria-invalid", String(!valid));
   return valid;
 }
 
-elements.email.addEventListener("blur", validateEmail);
+elements.name.addEventListener("blur", validateName);
 
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
   elements.message.textContent = "";
 
-  if (!validateEmail()) {
-    elements.message.textContent = "Enter a valid email address.";
-    elements.email.focus();
-    return;
-  }
-  if (!elements.consent.checked) {
-    elements.message.textContent = "Please accept the Terms and Privacy Policy to continue.";
-    elements.consent.focus();
+  if (!validateName()) {
+    elements.message.textContent = "Enter your name to continue.";
+    elements.name.focus();
     return;
   }
 
@@ -105,7 +103,7 @@ elements.form.addEventListener("submit", async (event) => {
   try {
     const { data } = await promoApi.claim({
       campaignId: PROMO_CAMPAIGN_ID,
-      email: elements.email.value,
+      name: elements.name.value,
       deviceId: getDeviceId()
     });
     elements.code.textContent = data.code;
@@ -122,7 +120,7 @@ elements.form.addEventListener("submit", async (event) => {
     }
   } finally {
     elements.button.disabled = false;
-    elements.button.querySelector("span").textContent = "Claim Premium code";
+    elements.button.querySelector("span").textContent = "Claim promo";
   }
 });
 

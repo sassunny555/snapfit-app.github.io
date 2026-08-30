@@ -151,6 +151,28 @@ body {
     white-space: nowrap;
 }
 
+.nav-promo {
+    display: inline-flex;
+    min-height: 40px;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 16px;
+    border: 1px solid rgba(255, 255, 255, 0.32);
+    border-radius: 999px;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.12);
+    font-size: 0.8rem;
+    font-weight: 700;
+    text-decoration: none;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.nav-promo:hover {
+    border-color: rgba(255, 255, 255, 0.58);
+    background: rgba(255, 255, 255, 0.2);
+}
+
 .nav-cta:hover {
     transform: translateY(-2px);
     box-shadow: 0 6px 20px rgba(0, 102, 238, 0.4);
@@ -215,6 +237,16 @@ body.nav-scrolled .hero .nav-cta {
 body.nav-scrolled .hero .nav-cta:hover {
     background: var(--primary-dark);
     box-shadow: 0 6px 20px rgba(0, 102, 238, 0.4);
+}
+
+body.nav-scrolled .hero .nav-promo {
+    border-color: rgba(0, 102, 238, 0.16);
+    color: var(--primary);
+    background: #eef6ff;
+}
+
+body.nav-scrolled .hero .nav-promo:hover {
+    background: #deedff;
 }
 
 /* ===== Hero Content ===== */
@@ -1964,6 +1996,12 @@ body.nav-scrolled .hero .nav-cta:hover {
     .nav-cta {
         padding: 9px 16px;
         font-size: 0.78rem;
+    }
+
+    .nav-promo {
+        min-height: 36px;
+        padding: 7px 12px;
+        font-size: 0.74rem;
     }
 
     .hero-inner {

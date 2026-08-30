@@ -63,12 +63,12 @@ function normalizeCampaignId(value) {
   return campaignId;
 }
 
-function normalizeEmail(value) {
-  const email = requiredString(value, "Email", 254).toLowerCase();
-  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-    throw new ApiError(400, "invalid-argument", "Enter a valid email address.");
+function normalizeName(value) {
+  const name = requiredString(value, "Name", 80).replace(/\s+/g, " ");
+  if (!/^[\p{L}\p{M}][\p{L}\p{M}\p{N} .'-]{1,79}$/u.test(name)) {
+    throw new ApiError(400, "invalid-argument", "Enter a valid name.");
   }
-  return email;
+  return name;
 }
 
 function normalizeDeviceId(value) {
@@ -148,23 +148,20 @@ async function getPromoStatus(data) {
 
 async function claimPromo(data, req) {
   const campaignId = normalizeCampaignId(data.campaignId);
-  const email = normalizeEmail(data.email);
+  const claimantName = normalizeName(data.name);
   const deviceId = normalizeDeviceId(data.deviceId);
-  const emailHash = privateHash("email", email);
   const deviceHash = privateHash("device", deviceId);
   const ipHash = privateHash("ip", clientIp(req));
   const firestore = db();
   const campaignRef = firestore.collection("promoCampaigns").doc(campaignId);
-  const emailLockRef = firestore.collection("promoClaimLocks").doc(`${campaignId}_email_${emailHash}`);
   const deviceLockRef = firestore.collection("promoClaimLocks").doc(`${campaignId}_device_${deviceHash}`);
   const ipStatRef = firestore.collection("promoIpStats").doc(`${campaignId}_${ipHash}`);
   const claimRef = firestore.collection("promoClaims").doc();
   const now = Timestamp.now();
 
   return firestore.runTransaction(async (transaction) => {
-    const [campaignSnapshot, emailLock, deviceLock, ipStat] = await Promise.all([
+    const [campaignSnapshot, deviceLock, ipStat] = await Promise.all([
       transaction.get(campaignRef),
-      transaction.get(emailLockRef),
       transaction.get(deviceLockRef),
       transaction.get(ipStatRef)
     ]);
@@ -172,8 +169,8 @@ async function claimPromo(data, req) {
     if (!campaignIsOpen(campaignSnapshot.data(), now.toMillis())) {
       throw new ApiError(409, "failed-precondition", "This promotion is currently closed.");
     }
-    if (emailLock.exists || deviceLock.exists) {
-      throw new ApiError(409, "already-exists", "A free code has already been claimed with this email or browser.");
+    if (deviceLock.exists) {
+      throw new ApiError(409, "already-exists", "A free code has already been claimed from this browser.");
     }
     if ((ipStat.data()?.claimCount || 0) >= MAX_CLAIMS_PER_IP) {
       throw new ApiError(429, "resource-exhausted", "The claim limit for this network has been reached.");
@@ -191,8 +188,7 @@ async function claimPromo(data, req) {
     const code = codeSnapshot.data().code;
     const lockData = { campaignId, claimId: claimRef.id, createdAt: now };
     transaction.update(codeSnapshot.ref, { status: "claimed", claimId: claimRef.id, claimedAt: now, updatedAt: now });
-    transaction.create(claimRef, { campaignId, codeId: codeSnapshot.id, emailHash, deviceHash, ipHash, claimedAt: now });
-    transaction.create(emailLockRef, { ...lockData, type: "email" });
+    transaction.create(claimRef, { campaignId, codeId: codeSnapshot.id, claimantName, deviceHash, ipHash, claimedAt: now });
     transaction.create(deviceLockRef, { ...lockData, type: "device" });
     transaction.set(ipStatRef, { campaignId, claimCount: FieldValue.increment(1), updatedAt: now }, { merge: true });
     transaction.update(campaignRef, {
