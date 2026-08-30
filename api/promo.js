@@ -187,8 +187,12 @@ async function requireAdmin(req) {
   let decoded;
   try {
     const { getAuth } = await import("firebase-admin/auth");
-    decoded = await getAuth(adminApp()).verifyIdToken(authorization.slice(7), true);
-  } catch {
+    decoded = await getAuth(adminApp()).verifyIdToken(authorization.slice(7));
+  } catch (error) {
+    console.error("Promo admin token verification failed", {
+      code: error?.code || "unknown",
+      message: error?.message || "Token verification failed"
+    });
     throw new ApiError(401, "unauthenticated", "Your admin session is invalid or expired.");
   }
 

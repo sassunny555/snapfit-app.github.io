@@ -34,6 +34,9 @@ async function callPromoApi(action, data, requiresAdmin = false) {
   });
   const payload = await response.json().catch(() => ({}));
   if (!response.ok) {
+    if (response.status === 401 && requiresAdmin && auth.currentUser) {
+      await signOut(auth).catch(() => {});
+    }
     const error = new Error(payload.error?.message || "The promo service is unavailable.");
     error.code = payload.error?.code;
     throw error;

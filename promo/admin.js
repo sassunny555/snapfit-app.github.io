@@ -5,7 +5,7 @@ import {
   promoApi,
   signInWithEmailAndPassword,
   signOut
-} from "./firebase-config.js?v=20260830-email-auth";
+} from "./firebase-config.js?v=20260830-auth-fix";
 
 const elements = {
   authPanel: document.getElementById("authPanel"),
