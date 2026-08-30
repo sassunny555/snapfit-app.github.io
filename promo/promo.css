@@ -506,6 +506,9 @@ a { color: inherit; }
 .auth-card h1 { margin: 0 0 10px; font-size: 2rem; }
 .auth-card p { margin: 0 0 24px; color: var(--muted); }
 .auth-card .primary-button { max-width: 280px; margin: 0 auto; }
+.admin-login-form { margin-top: 24px; text-align: left; }
+.admin-login-form .primary-button { max-width: none; }
+.admin-login-form .admin-message { text-align: center; }
 
 @media (max-width: 900px) {
   .promo-main { grid-template-columns: 1fr; max-width: 650px; padding-top: 32px; }

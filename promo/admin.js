@@ -1,16 +1,18 @@
 import {
   PROMO_CAMPAIGN_ID,
   auth,
-  googleProvider,
   onAuthStateChanged,
   promoApi,
-  signInWithPopup,
+  signInWithEmailAndPassword,
   signOut
-} from "./firebase-config.js";
+} from "./firebase-config.js?v=20260830-email-auth";
 
 const elements = {
   authPanel: document.getElementById("authPanel"),
   adminPanel: document.getElementById("adminPanel"),
+  signInForm: document.getElementById("signInForm"),
+  email: document.getElementById("adminEmail"),
+  password: document.getElementById("adminPassword"),
   signIn: document.getElementById("signInButton"),
   signOut: document.getElementById("signOutButton"),
   authMessage: document.getElementById("authMessage"),
@@ -138,13 +140,16 @@ async function refreshDashboard() {
   }
 }
 
-elements.signIn.addEventListener("click", async () => {
+elements.signInForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
   elements.signIn.disabled = true;
   setMessage(elements.authMessage, "");
   try {
-    await signInWithPopup(auth, googleProvider);
+    await signInWithEmailAndPassword(auth, elements.email.value.trim(), elements.password.value);
+    elements.password.value = "";
   } catch (error) {
-    setMessage(elements.authMessage, errorText(error), true);
+    const message = errorText(error);
+    setMessage(elements.authMessage, message.includes("auth/") ? "Invalid email or password." : message, true);
   } finally {
     elements.signIn.disabled = false;
   }

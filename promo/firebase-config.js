@@ -1,9 +1,8 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-app.js";
 import {
   getAuth,
-  GoogleAuthProvider,
   onAuthStateChanged,
-  signInWithPopup,
+  signInWithEmailAndPassword,
   signOut
 } from "https://www.gstatic.com/firebasejs/12.18.0/firebase-auth.js";
 
@@ -19,13 +18,12 @@ const firebaseConfig = {
 export const PROMO_CAMPAIGN_ID = "premium-launch-2026";
 export const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const googleProvider = new GoogleAuthProvider();
 
 async function callPromoApi(action, data, requiresAdmin = false) {
   const headers = { "Content-Type": "application/json" };
   if (requiresAdmin) {
     const user = auth.currentUser;
-    if (!user) throw new Error("Sign in with an authorized Google account.");
+    if (!user) throw new Error("Sign in with an authorized admin account.");
     headers.Authorization = `Bearer ${await user.getIdToken()}`;
   }
 
@@ -53,4 +51,4 @@ export const promoApi = {
   deleteCodes: (data) => callPromoApi("adminDeleteAvailableCodes", data, true)
 };
 
-export { onAuthStateChanged, signInWithPopup, signOut };
+export { onAuthStateChanged, signInWithEmailAndPassword, signOut };

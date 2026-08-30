@@ -181,7 +181,7 @@ function serializeTime(value) {
 async function requireAdmin(req) {
   const authorization = req.headers.authorization || "";
   if (!authorization.startsWith("Bearer ")) {
-    throw new ApiError(401, "unauthenticated", "Sign in with an authorized Google account.");
+    throw new ApiError(401, "unauthenticated", "Sign in with an authorized admin account.");
   }
 
   let decoded;
@@ -193,11 +193,12 @@ async function requireAdmin(req) {
   }
 
   const email = decoded.email?.toLowerCase();
+  const provider = decoded.firebase?.sign_in_provider;
   const allowed = (process.env.ADMIN_EMAILS || "")
     .split(",")
     .map((item) => item.trim().toLowerCase())
     .filter(Boolean);
-  if (!email || decoded.email_verified !== true || !allowed.includes(email)) {
+  if (!email || provider !== "password" || !allowed.includes(email)) {
     throw new ApiError(403, "permission-denied", "This account is not authorized for promo administration.");
   }
   return email;

@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="promo.css">
+  <link rel="stylesheet" href="promo.css?v=20260830-email-auth">
 </head>
 <body class="admin-body">
   <header class="promo-header">
@@ -25,9 +25,19 @@
     <section id="authPanel" class="admin-card auth-card">
       <div class="brand"><img src="../Resources/logo.png" alt="" width="650" height="720"><span>SnapFit</span></div>
       <h1>Promotion admin</h1>
-      <p>Sign in with an authorized Google account to manage campaigns and Premium inventory.</p>
-      <button id="signInButton" class="primary-button" type="button">Continue with Google</button>
-      <p id="authMessage" class="admin-message error" role="alert"></p>
+      <p>Sign in with your authorized admin email to manage campaigns and Premium inventory.</p>
+      <form id="signInForm" class="admin-login-form">
+        <div class="admin-field">
+          <label for="adminEmail">Admin email</label>
+          <input id="adminEmail" name="email" type="email" autocomplete="username" required>
+        </div>
+        <div class="admin-field">
+          <label for="adminPassword">Password</label>
+          <input id="adminPassword" name="password" type="password" autocomplete="current-password" minlength="6" required>
+        </div>
+        <button id="signInButton" class="primary-button" type="submit">Sign in</button>
+        <p id="authMessage" class="admin-message error" role="alert"></p>
+      </form>
     </section>
 
     <section id="adminPanel" class="admin-main" hidden>
@@ -115,6 +125,6 @@
     </section>
   </main>
 
-  <script type="module" src="admin.js"></script>
+  <script type="module" src="admin.js?v=20260830-email-auth"></script>
 </body>
 </html>
