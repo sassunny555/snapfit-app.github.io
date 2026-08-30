@@ -1,4 +1,6 @@
-import { PROMO_CAMPAIGN_ID, promoApi } from "./firebase-config.js";
+import { promoApi } from "./firebase-config.js?v=20260830-campaign-cards";
+
+let publicCampaignId = null;
 
 const elements = {
   loading: document.getElementById("loadingState"),
@@ -65,7 +67,8 @@ async function loadStatus() {
     return;
   }
   try {
-    const { data } = await promoApi.status({ campaignId: PROMO_CAMPAIGN_ID });
+    const { data } = await promoApi.status({});
+    publicCampaignId = data.campaignId;
     if (!data.exists || !data.active) {
       showState(elements.closed);
     } else if (data.availableCount < 1) {
@@ -103,7 +106,7 @@ elements.form.addEventListener("submit", async (event) => {
   elements.button.querySelector("span").textContent = "Assigning your code…";
   try {
     const { data } = await promoApi.claim({
-      campaignId: PROMO_CAMPAIGN_ID,
+      campaignId: publicCampaignId,
       name: elements.name.value,
       deviceId: getDeviceId()
     });

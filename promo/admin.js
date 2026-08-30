@@ -1,11 +1,10 @@
 import {
-  PROMO_CAMPAIGN_ID,
   auth,
   onAuthStateChanged,
   promoApi,
   signInWithEmailAndPassword,
   signOut
-} from "./firebase-config.js?v=20260830-auth-fix";
+} from "./firebase-config.js?v=20260830-campaign-cards";
 
 const elements = {
   authPanel: document.getElementById("authPanel"),
@@ -17,11 +16,19 @@ const elements = {
   signOut: document.getElementById("signOutButton"),
   authMessage: document.getElementById("authMessage"),
   signedIn: document.getElementById("signedInText"),
+  campaignCards: document.getElementById("campaignCards"),
+  showCreateCampaign: document.getElementById("showCreateCampaignButton"),
+  createCampaignForm: document.getElementById("createCampaignForm"),
+  cancelCreateCampaign: document.getElementById("cancelCreateCampaignButton"),
+  newCampaignName: document.getElementById("newCampaignName"),
+  newCampaignId: document.getElementById("newCampaignId"),
+  createCampaignMessage: document.getElementById("createCampaignMessage"),
   campaignForm: document.getElementById("campaignForm"),
   campaignId: document.getElementById("campaignId"),
   campaignName: document.getElementById("campaignName"),
   campaignActive: document.getElementById("campaignActive"),
   campaignMessage: document.getElementById("campaignMessage"),
+  setPublicCampaign: document.getElementById("setPublicCampaignButton"),
   importForm: document.getElementById("importForm"),
   codeInput: document.getElementById("codeInput"),
   importButton: document.getElementById("importButton"),
@@ -38,7 +45,9 @@ const elements = {
 };
 
 let activeStatus = "available";
-elements.campaignId.value = PROMO_CAMPAIGN_ID;
+let activeCampaignId = null;
+let publicCampaignId = null;
+let campaignList = [];
 
 function errorText(error) {
   return String(error?.message || "Something went wrong.")
@@ -57,6 +66,52 @@ function formatTime(value) {
     dateStyle: "medium",
     timeStyle: "short"
   }).format(new Date(value));
+}
+
+function renderCampaignCards() {
+  elements.campaignCards.replaceChildren();
+  campaignList.forEach((campaign) => {
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "campaign-select-card";
+    card.classList.toggle("selected", campaign.id === activeCampaignId);
+    card.setAttribute("aria-pressed", String(campaign.id === activeCampaignId));
+
+    const top = document.createElement("span");
+    top.className = "campaign-card-top";
+    const name = document.createElement("strong");
+    name.textContent = campaign.name;
+    top.append(name);
+    if (campaign.id === publicCampaignId) {
+      const badge = document.createElement("span");
+      badge.className = "public-badge";
+      badge.textContent = "Public";
+      top.append(badge);
+    }
+
+    const id = document.createElement("code");
+    id.textContent = campaign.id;
+    const stats = document.createElement("span");
+    stats.className = "campaign-card-stats";
+    stats.textContent = `${campaign.availableCount} available · ${campaign.claimedCount} claimed · ${campaign.active ? "Open" : "Paused"}`;
+    card.append(top, id, stats);
+    card.addEventListener("click", async () => {
+      activeCampaignId = campaign.id;
+      renderCampaignCards();
+      await loadSelectedCampaign();
+    });
+    elements.campaignCards.append(card);
+  });
+}
+
+async function loadCampaignCards(preferredCampaignId = activeCampaignId) {
+  const { data } = await promoApi.listCampaigns();
+  campaignList = data.campaigns || [];
+  publicCampaignId = data.publicCampaignId;
+  activeCampaignId = campaignList.some((campaign) => campaign.id === preferredCampaignId)
+    ? preferredCampaignId
+    : (campaignList.find((campaign) => campaign.id === publicCampaignId)?.id || campaignList[0]?.id || null);
+  renderCampaignCards();
 }
 
 function renderRows(codes) {
@@ -101,18 +156,23 @@ function renderRows(codes) {
 }
 
 async function loadCampaign() {
-  const { data } = await promoApi.status({ campaignId: PROMO_CAMPAIGN_ID });
+  if (!activeCampaignId) return;
+  const { data } = await promoApi.status({ campaignId: activeCampaignId });
+  elements.campaignId.value = activeCampaignId;
   elements.campaignName.value = data.name || elements.campaignName.value;
   elements.campaignActive.checked = data.active === true;
   elements.availableCount.textContent = (data.availableCount || 0).toLocaleString();
   elements.claimedCount.textContent = (data.claimedCount || 0).toLocaleString();
+  const isPublic = activeCampaignId === publicCampaignId;
+  elements.setPublicCampaign.disabled = isPublic;
+  elements.setPublicCampaign.textContent = isPublic ? "Current public promo" : "Set as public promo";
 }
 
 async function loadCodes() {
   elements.rows.innerHTML = '<tr><td colspan="4">Loading inventory…</td></tr>';
   setMessage(elements.inventoryMessage, "");
   try {
-    const { data } = await promoApi.listCodes({ campaignId: PROMO_CAMPAIGN_ID, status: activeStatus });
+    const { data } = await promoApi.listCodes({ campaignId: activeCampaignId, status: activeStatus });
     renderRows(data.codes);
   } catch (error) {
     elements.rows.innerHTML = '<tr><td colspan="4">Unable to load inventory.</td></tr>';
@@ -121,14 +181,20 @@ async function loadCodes() {
 }
 
 async function loadAbuseSummary() {
-  const { data } = await promoApi.getAbuseSummary({ campaignId: PROMO_CAMPAIGN_ID });
+  const { data } = await promoApi.getAbuseSummary({ campaignId: activeCampaignId });
   elements.blockedCount.textContent = (data.blockedLast24Hours || 0).toLocaleString();
   elements.protectionSummary.textContent = `Active: 1 claim per browser, up to ${data.protections.maxClaimsPerIp} per network, and ${data.protections.maxAttemptsPerTenMinutes} attempts per 10 minutes.`;
 }
 
+async function loadSelectedCampaign() {
+  if (!activeCampaignId) return;
+  await Promise.all([loadCampaign(), loadCodes(), loadAbuseSummary()]);
+}
+
 async function refreshDashboard() {
   try {
-    await Promise.all([loadCampaign(), loadCodes(), loadAbuseSummary()]);
+    await loadCampaignCards();
+    await loadSelectedCampaign();
   } catch (error) {
     const message = errorText(error);
     setMessage(elements.inventoryMessage, message, true);
@@ -157,6 +223,45 @@ elements.signInForm.addEventListener("submit", async (event) => {
 
 elements.signOut.addEventListener("click", () => signOut(auth));
 
+elements.showCreateCampaign.addEventListener("click", () => {
+  elements.createCampaignForm.hidden = false;
+  elements.showCreateCampaign.hidden = true;
+  elements.newCampaignName.focus();
+});
+
+elements.cancelCreateCampaign.addEventListener("click", () => {
+  elements.createCampaignForm.hidden = true;
+  elements.showCreateCampaign.hidden = false;
+  elements.createCampaignForm.reset();
+  setMessage(elements.createCampaignMessage, "");
+});
+
+elements.createCampaignForm.addEventListener("submit", async (event) => {
+  event.preventDefault();
+  const button = elements.createCampaignForm.querySelector('button[type="submit"]');
+  const newId = elements.newCampaignId.value.trim().toLowerCase();
+  button.disabled = true;
+  setMessage(elements.createCampaignMessage, "Creating…");
+  try {
+    await promoApi.saveCampaign({
+      campaignId: newId,
+      name: elements.newCampaignName.value,
+      active: false,
+      createOnly: true
+    });
+    activeCampaignId = newId;
+    elements.createCampaignForm.reset();
+    elements.createCampaignForm.hidden = true;
+    elements.showCreateCampaign.hidden = false;
+    setMessage(elements.createCampaignMessage, "");
+    await refreshDashboard();
+  } catch (error) {
+    setMessage(elements.createCampaignMessage, errorText(error), true);
+  } finally {
+    button.disabled = false;
+  }
+});
+
 onAuthStateChanged(auth, (user) => {
   elements.authPanel.hidden = Boolean(user);
   elements.adminPanel.hidden = !user;
@@ -173,16 +278,33 @@ elements.campaignForm.addEventListener("submit", async (event) => {
   setMessage(elements.campaignMessage, "Saving…");
   try {
     await promoApi.saveCampaign({
-      campaignId: PROMO_CAMPAIGN_ID,
+      campaignId: activeCampaignId,
       name: elements.campaignName.value,
       active: elements.campaignActive.checked
     });
     setMessage(elements.campaignMessage, "Campaign saved.");
+    await loadCampaignCards(activeCampaignId);
     await loadCampaign();
   } catch (error) {
     setMessage(elements.campaignMessage, errorText(error), true);
   } finally {
     button.disabled = false;
+  }
+});
+
+elements.setPublicCampaign.addEventListener("click", async () => {
+  elements.setPublicCampaign.disabled = true;
+  setMessage(elements.campaignMessage, "Publishing campaign…");
+  try {
+    await promoApi.setPublicCampaign({ campaignId: activeCampaignId });
+    publicCampaignId = activeCampaignId;
+    setMessage(elements.campaignMessage, "This campaign now appears on the public promo page.");
+    await loadCampaignCards(activeCampaignId);
+    await loadCampaign();
+  } catch (error) {
+    setMessage(elements.campaignMessage, errorText(error), true);
+  } finally {
+    elements.setPublicCampaign.disabled = activeCampaignId === publicCampaignId;
   }
 });
 
@@ -201,7 +323,7 @@ elements.importForm.addEventListener("submit", async (event) => {
     for (let index = 0; index < codes.length; index += 400) {
       setMessage(elements.importMessage, `Importing ${Math.min(index + 400, codes.length)} of ${codes.length}…`);
       const { data } = await promoApi.importCodes({
-        campaignId: PROMO_CAMPAIGN_ID,
+        campaignId: activeCampaignId,
         codes: codes.slice(index, index + 400)
       });
       imported += data.imported;
@@ -246,7 +368,7 @@ elements.delete.addEventListener("click", async () => {
 
   elements.delete.disabled = true;
   try {
-    const { data } = await promoApi.deleteCodes({ campaignId: PROMO_CAMPAIGN_ID, codeIds: selected });
+    const { data } = await promoApi.deleteCodes({ campaignId: activeCampaignId, codeIds: selected });
     setMessage(elements.inventoryMessage, `Deleted ${data.deleted} available code${data.deleted === 1 ? "" : "s"}.`);
     await refreshDashboard();
   } catch (error) {

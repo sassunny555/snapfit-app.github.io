@@ -10,7 +10,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="promo.css?v=20260830-email-auth">
+  <link rel="stylesheet" href="promo.css?v=20260830-campaign-cards">
 </head>
 <body class="admin-body">
   <header class="promo-header">
@@ -50,6 +50,33 @@
         <button id="signOutButton" class="secondary-button" type="button">Sign out</button>
       </div>
 
+      <section class="campaign-library" aria-labelledby="campaign-library-title">
+        <div class="campaign-library-header">
+          <div>
+            <h2 id="campaign-library-title">Campaigns</h2>
+            <p>Select a campaign to manage its settings and code inventory.</p>
+          </div>
+          <button id="showCreateCampaignButton" class="secondary-button" type="button">New campaign</button>
+        </div>
+        <form id="createCampaignForm" class="create-campaign-form" hidden>
+          <div class="admin-field">
+            <label for="newCampaignName">Campaign name</label>
+            <input id="newCampaignName" type="text" maxlength="100" placeholder="Summer Premium Drop" required>
+          </div>
+          <div class="admin-field">
+            <label for="newCampaignId">Unique campaign ID</label>
+            <input id="newCampaignId" type="text" maxlength="64" pattern="[a-z0-9][a-z0-9-]{2,63}" placeholder="summer-premium-2026" required aria-describedby="campaignIdHint">
+            <span id="campaignIdHint" class="field-hint">Lowercase letters, numbers, and hyphens only. This cannot be changed later.</span>
+          </div>
+          <div class="admin-actions">
+            <button class="primary-button" type="submit">Create campaign</button>
+            <button id="cancelCreateCampaignButton" class="secondary-button" type="button">Cancel</button>
+          </div>
+          <p id="createCampaignMessage" class="admin-message" role="status"></p>
+        </form>
+        <div id="campaignCards" class="campaign-card-grid" aria-live="polite"><p class="campaign-loading">Loading campaigns…</p></div>
+      </section>
+
       <div class="admin-grid">
         <div class="admin-stack">
           <article class="admin-card">
@@ -73,6 +100,7 @@
               </div>
               <div class="admin-actions">
                 <button class="primary-button" type="submit">Save campaign</button>
+                <button id="setPublicCampaignButton" class="secondary-button" type="button">Set as public promo</button>
               </div>
               <p id="campaignMessage" class="admin-message" role="status"></p>
             </form>
@@ -125,6 +153,6 @@
     </section>
   </main>
 
-  <script type="module" src="admin.js?v=20260830-auth-fix"></script>
+  <script type="module" src="admin.js?v=20260830-campaign-cards"></script>
 </body>
 </html>

@@ -9,12 +9,15 @@ const MAX_CLAIM_ATTEMPTS_PER_WINDOW = 8;
 const CLAIM_ATTEMPT_WINDOW_MS = 10 * 60 * 1000;
 const CLAIM_COOKIE_NAME = "snapfit_promo_visitor";
 const CLAIM_COOKIE_MAX_AGE = 60 * 60 * 24 * 365;
+const DEFAULT_CAMPAIGN_ID = "premium-launch-2026";
 const CAMPAIGN_ID_PATTERN = /^[a-z0-9][a-z0-9-]{2,63}$/;
 const CODE_PATTERN = /^[A-Z0-9][A-Z0-9_-]{2,79}$/;
 const ADMIN_ACTIONS = new Set([
   "adminSaveCampaign",
   "adminImportCodes",
   "adminListCodes",
+  "adminListCampaigns",
+  "adminSetPublicCampaign",
   "adminGetAbuseSummary",
   "adminDeleteAvailableCodes"
 ]);
@@ -209,12 +212,21 @@ async function requireAdmin(req) {
 }
 
 async function getPromoStatus(data) {
-  const campaignId = normalizeCampaignId(data.campaignId);
+  let campaignId;
+  if (data?.campaignId) {
+    campaignId = normalizeCampaignId(data.campaignId);
+  } else {
+    const publicSettings = await db().collection("promoSettings").doc("public").get();
+    campaignId = publicSettings.exists
+      ? normalizeCampaignId(publicSettings.data().campaignId)
+      : DEFAULT_CAMPAIGN_ID;
+  }
   const snapshot = await db().collection("promoCampaigns").doc(campaignId).get();
-  if (!snapshot.exists) return { exists: false, active: false, availableCount: 0, claimedCount: 0 };
+  if (!snapshot.exists) return { campaignId, exists: false, active: false, availableCount: 0, claimedCount: 0 };
   const campaign = snapshot.data();
   return {
     exists: true,
+    campaignId,
     name: campaign.name || "SnapFit Premium",
     active: campaignIsOpen(campaign, Date.now()),
     availableCount: Math.max(0, Number(campaign.availableCount) || 0),
@@ -290,6 +302,9 @@ async function adminSaveCampaign(data, adminEmail) {
   const active = data.active === true;
   const campaignRef = db().collection("promoCampaigns").doc(campaignId);
   const existing = await campaignRef.get();
+  if (data.createOnly === true && existing.exists) {
+    throw new ApiError(409, "already-exists", "That campaign ID is already in use.");
+  }
   const now = Timestamp.now();
   await campaignRef.set({
     name,
@@ -300,6 +315,39 @@ async function adminSaveCampaign(data, adminEmail) {
     updatedAt: now,
     updatedBy: adminEmail
   }, { merge: true });
+  return { ok: true, campaignId };
+}
+
+async function adminListCampaigns() {
+  const firestore = db();
+  const [campaigns, publicSettings] = await Promise.all([
+    firestore.collection("promoCampaigns").orderBy("updatedAt", "desc").limit(50).get(),
+    firestore.collection("promoSettings").doc("public").get()
+  ]);
+  const publicCampaignId = publicSettings.exists ? publicSettings.data().campaignId : DEFAULT_CAMPAIGN_ID;
+  return {
+    publicCampaignId,
+    campaigns: campaigns.docs.map((doc) => ({
+      id: doc.id,
+      name: doc.data().name || doc.id,
+      active: doc.data().active === true,
+      availableCount: Math.max(0, Number(doc.data().availableCount) || 0),
+      claimedCount: Math.max(0, Number(doc.data().claimedCount) || 0),
+      updatedAt: serializeTime(doc.data().updatedAt)
+    }))
+  };
+}
+
+async function adminSetPublicCampaign(data, adminEmail) {
+  const campaignId = normalizeCampaignId(data.campaignId);
+  const firestore = db();
+  const campaign = await firestore.collection("promoCampaigns").doc(campaignId).get();
+  if (!campaign.exists) throw new ApiError(404, "not-found", "Campaign not found.");
+  await firestore.collection("promoSettings").doc("public").set({
+    campaignId,
+    updatedAt: Timestamp.now(),
+    updatedBy: adminEmail
+  });
   return { ok: true, campaignId };
 }
 
@@ -426,6 +474,8 @@ module.exports = async function handler(req, res) {
     else if (action === "adminSaveCampaign") result = await adminSaveCampaign(data, adminEmail);
     else if (action === "adminImportCodes") result = await adminImportCodes(data, adminEmail);
     else if (action === "adminListCodes") result = await adminListCodes(data);
+    else if (action === "adminListCampaigns") result = await adminListCampaigns();
+    else if (action === "adminSetPublicCampaign") result = await adminSetPublicCampaign(data, adminEmail);
     else if (action === "adminGetAbuseSummary") result = await adminGetAbuseSummary(data);
     else if (action === "adminDeleteAvailableCodes") result = await adminDeleteAvailableCodes(data, adminEmail);
     else throw new ApiError(404, "not-found", "Unknown promo action.");
