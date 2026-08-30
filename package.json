@@ -2,10 +2,10 @@
   "name": "snapfit-website",
   "private": true,
   "engines": {
-    "node": "24.x"
+    "node": "22.x"
   },
   "dependencies": {
-    "firebase-admin": "14.3.0"
+    "firebase-admin": "13.6.0"
   },
   "overrides": {
     "uuid": "11.1.1"
