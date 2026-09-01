@@ -12,7 +12,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css?v=20260830-nav-center">
-  <link rel="stylesheet" href="promo.css?v=20260830-premium-logo">
+  <link rel="stylesheet" href="promo.css?v=20260901-success-screen">
 </head>
 <body class="simple-promo-body">
   <nav class="navbar promo-navbar" aria-label="Main navigation">
@@ -57,10 +57,10 @@
       </div>
 
       <div id="successState" class="result-state simple-success" hidden aria-live="polite">
-        <span class="result-icon success-icon success-pop" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></span>
-        <span class="eyebrow">Promo claimed</span>
-        <h2>Your Premium code</h2>
-        <p>Copy the code below and redeem it in SnapFit.</p>
+        <div class="success-celebration success-pop" aria-hidden="true">🎉</div>
+        <span class="eyebrow">Promo claimed successfully</span>
+        <h2>Congratulations!</h2>
+        <p class="success-code-label">Your SnapFit Premium code:</p>
         <div class="code-box code-reveal">
           <code id="claimedCode"></code>
           <button id="copyButton" type="button" aria-label="Copy Premium code">
@@ -68,6 +68,15 @@
             <span>Copy</span>
           </button>
         </div>
+        <section class="redemption-guide" aria-labelledby="redemption-title">
+          <h3 id="redemption-title">How to redeem</h3>
+          <ol>
+            <li><span aria-hidden="true">1</span><p>Open the <strong>Google Play Store</strong></p></li>
+            <li><span aria-hidden="true">2</span><p>Go to <strong>Payments &amp; subscriptions</strong></p></li>
+            <li><span aria-hidden="true">3</span><p>Select <strong>Redeem code</strong></p></li>
+          </ol>
+        </section>
+        <p class="success-closing">Enjoy SnapFit Premium <span aria-hidden="true">❤️</span></p>
       </div>
 
       <div id="emptyState" class="result-state" hidden aria-live="polite">
