@@ -7,6 +7,52 @@ document.addEventListener('DOMContentLoaded', () => {
     updateNavState();
     window.addEventListener('scroll', updateNavState, { passive: true });
 
+    // Accessible mobile navigation drawer for the homepage.
+    const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+    const mobileNav = document.getElementById('mobileNav');
+    const mobileNavBackdrop = document.getElementById('mobileNavBackdrop');
+    const mobileMenuQuery = window.matchMedia('(max-width: 920px)');
+
+    const setMobileMenuOpen = (open, returnFocus = false) => {
+        if (!mobileMenuToggle || !mobileNav) return;
+
+        const shouldOpen = open && mobileMenuQuery.matches;
+        document.body.classList.toggle('mobile-nav-open', shouldOpen);
+        mobileMenuToggle.setAttribute('aria-expanded', String(shouldOpen));
+        mobileMenuToggle.setAttribute('aria-label', shouldOpen ? 'Close navigation menu' : 'Open navigation menu');
+        mobileNav.inert = mobileMenuQuery.matches && !shouldOpen;
+
+        if (shouldOpen) {
+            mobileNav.querySelector('a')?.focus();
+        } else if (returnFocus) {
+            mobileMenuToggle.focus();
+        }
+    };
+
+    const syncMobileMenu = () => {
+        if (!mobileMenuToggle || !mobileNav) return;
+        if (mobileMenuQuery.matches) {
+            setMobileMenuOpen(document.body.classList.contains('mobile-nav-open'));
+        } else {
+            document.body.classList.remove('mobile-nav-open');
+            mobileMenuToggle.setAttribute('aria-expanded', 'false');
+            mobileMenuToggle.setAttribute('aria-label', 'Open navigation menu');
+            mobileNav.inert = false;
+        }
+    };
+
+    if (mobileMenuToggle && mobileNav && mobileNavBackdrop) {
+        syncMobileMenu();
+        mobileMenuToggle.addEventListener('click', () => {
+            setMobileMenuOpen(!document.body.classList.contains('mobile-nav-open'));
+        });
+        mobileNavBackdrop.addEventListener('click', () => setMobileMenuOpen(false, true));
+        mobileNav.querySelectorAll('a').forEach((link) => {
+            link.addEventListener('click', () => setMobileMenuOpen(false));
+        });
+        mobileMenuQuery.addEventListener('change', syncMobileMenu);
+    }
+
     // Highlight the homepage navigation item while its section is selected.
     const featuresLink = document.querySelector('[data-nav-section="features"]');
     const featuresSection = document.getElementById('features');
@@ -90,7 +136,22 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close modals on Escape key
     document.addEventListener('keydown', (e) => {
         if (e.key === 'Escape') {
+            if (document.body.classList.contains('mobile-nav-open')) setMobileMenuOpen(false, true);
             if (modal && modal.classList.contains('active')) hideModal();
+        }
+
+        if (e.key === 'Tab' && document.body.classList.contains('mobile-nav-open') && mobileMenuToggle && mobileNav) {
+            const focusableItems = [mobileMenuToggle, ...mobileNav.querySelectorAll('a')];
+            const firstItem = focusableItems[0];
+            const lastItem = focusableItems[focusableItems.length - 1];
+
+            if (e.shiftKey && document.activeElement === firstItem) {
+                e.preventDefault();
+                lastItem.focus();
+            } else if (!e.shiftKey && document.activeElement === lastItem) {
+                e.preventDefault();
+                firstItem.focus();
+            }
         }
     });
     

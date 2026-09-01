@@ -35,7 +35,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="style.css?v=20260830-nav-center">
+    <link rel="stylesheet" href="style.css?v=20260901-mobile-nav">
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -102,13 +102,19 @@
                 <img src="Resources/logo.png" alt="SnapFit" width="650" height="720" decoding="async" style="width: auto; object-fit: contain;">
                 <span>SnapFit</span>
             </div>
-            <div class="nav-links">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle" type="button" aria-controls="mobileNav" aria-expanded="false" aria-label="Open navigation menu">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </button>
+            <div class="nav-links" id="mobileNav">
                 <a href="#features" class="nav-link" data-nav-section="features">Why SnapFit</a>
                 <a href="https://sites.google.com/view/snapfit-ai-privacy-policy" class="nav-link" target="_blank" rel="noopener noreferrer">Privacy Policy</a>
                 <a href="terms.html" class="nav-link">Terms &amp; Conditions</a>
                 <a href="mailto:itsneodesign@gmail.com" class="nav-link">Contact</a>
                 <a href="promo/" class="nav-link">Promo Code</a>
             </div>
+            <button class="mobile-nav-backdrop" id="mobileNavBackdrop" type="button" aria-label="Close navigation menu" tabindex="-1"></button>
         </nav>
         
         <div class="hero-inner">
@@ -494,6 +500,6 @@
         </div>
     </footer>
 
-    <script src="script.js?v=20260830-nav" defer></script>
+    <script src="script.js?v=20260901-mobile-nav" defer></script>
 </body>
 </html>
