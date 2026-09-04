@@ -9,7 +9,6 @@ const elements = {
   empty: document.getElementById("emptyState"),
   closed: document.getElementById("closedState"),
   form: document.getElementById("claimForm"),
-  name: document.getElementById("claimName"),
   button: document.getElementById("claimButton"),
   message: document.getElementById("formMessage"),
   code: document.getElementById("claimedCode"),
@@ -77,31 +76,16 @@ async function loadStatus() {
   }
 }
 
-function validateName() {
-  const name = elements.name.value.trim().replace(/\s+/g, " ");
-  const valid = name.length >= 2 && name.length <= 80;
-  elements.name.setAttribute("aria-invalid", String(!valid));
-  return valid;
-}
-
-elements.name.addEventListener("blur", validateName);
-
 elements.form.addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (elements.button.disabled) return;
   elements.message.textContent = "";
-
-  if (!validateName()) {
-    elements.message.textContent = "Enter your name to continue.";
-    elements.name.focus();
-    return;
-  }
 
   elements.button.disabled = true;
   elements.button.querySelector("span").textContent = "Assigning your code…";
   try {
     const { data } = await promoApi.claim({
       campaignId: publicCampaignId,
-      name: elements.name.value,
       deviceId: getDeviceId()
     });
     elements.code.textContent = data.code;

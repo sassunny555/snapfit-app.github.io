@@ -71,14 +71,6 @@ function normalizeCampaignId(value) {
   return campaignId;
 }
 
-function normalizeName(value) {
-  const name = requiredString(value, "Name", 80).replace(/\s+/g, " ");
-  if (!/^[\p{L}\p{M}][\p{L}\p{M}\p{N} .'-]{1,79}$/u.test(name)) {
-    throw new ApiError(400, "invalid-argument", "Enter a valid name.");
-  }
-  return name;
-}
-
 function normalizeDeviceId(value) {
   const deviceId = requiredString(value, "Browser identifier", 100);
   if (!/^[a-zA-Z0-9-]{16,100}$/.test(deviceId)) {
@@ -237,7 +229,6 @@ async function getPromoStatus(data) {
 
 async function claimPromo(data, req, visitorId) {
   const campaignId = normalizeCampaignId(data.campaignId);
-  const claimantName = normalizeName(data.name);
   const deviceId = normalizeDeviceId(data.deviceId);
   const deviceHash = privateHash("device", deviceId);
   const ipHash = privateHash("ip", clientIp(req));
@@ -283,7 +274,7 @@ async function claimPromo(data, req, visitorId) {
     const code = codeSnapshot.data().code;
     const lockData = { campaignId, claimId: claimRef.id, createdAt: now };
     transaction.update(codeSnapshot.ref, { status: "claimed", claimId: claimRef.id, claimedAt: now, updatedAt: now });
-    transaction.create(claimRef, { campaignId, codeId: codeSnapshot.id, claimantName, deviceHash, ipHash, claimedAt: now });
+    transaction.create(claimRef, { campaignId, codeId: codeSnapshot.id, deviceHash, ipHash, claimedAt: now });
     transaction.create(deviceLockRef, { ...lockData, type: "device" });
     transaction.create(visitorLockRef, { ...lockData, type: "signed-cookie" });
     transaction.set(ipStatRef, { campaignId, claimCount: FieldValue.increment(1), updatedAt: now }, { merge: true });
